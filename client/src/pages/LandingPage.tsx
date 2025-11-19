@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Leaf, Truck, Sparkles, ShoppingBag } from "lucide-react";
 import heroImage from "@assets/generated_images/Hero_fresh_produce_plate_9c1578ca.png";
+import { Link } from "wouter";
 
 export default function LandingPage() {
   return (
@@ -25,14 +26,26 @@ export default function LandingPage() {
             Premium organic fruits and vegetables delivered fresh to your doorstep.
             Join us today for a healthier tomorrow.
           </p>
-          <Button
-            size="lg"
-            onClick={() => window.location.href = "/api/login"}
-            className="shadow-lg hover:shadow-xl transition-all"
-            data-testid="button-login"
-          >
-            Sign In to Get Started
-          </Button>
+          <div className="flex justify-center gap-4">
+            <Link href="/login">
+              <Button
+                size="lg"
+                className="shadow-lg hover:shadow-xl transition-all"
+                data-testid="button-login"
+              >
+                Login
+              </Button>
+            </Link>
+            <Link href="/signup">
+              <Button
+                size="lg"
+                variant="outline"
+                className="shadow-lg hover:shadow-xl transition-all"
+              >
+                Sign Up
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -88,15 +101,16 @@ export default function LandingPage() {
             Ready to Start Your Journey?
           </h2>
           <p className="text-lg text-muted-foreground mb-8">
-            Sign in now to browse our collection of fresh, organic produce and start shopping
+            Sign up now to browse our collection of fresh, organic produce and start shopping
           </p>
-          <Button
-            size="lg"
-            onClick={() => window.location.href = "/api/login"}
-            className="shadow-lg hover:shadow-xl transition-all"
-          >
-            Sign In Now
-          </Button>
+          <Link href="/signup">
+            <Button
+              size="lg"
+              className="shadow-lg hover:shadow-xl transition-all"
+            >
+              Sign Up Now
+            </Button>
+          </Link>
         </div>
       </section>
     </div>

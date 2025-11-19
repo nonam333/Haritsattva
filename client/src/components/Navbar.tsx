@@ -50,6 +50,16 @@ export default function Navbar({}: NavbarProps) {
                 </Button>
               </Link>
             ))}
+            {isAuthenticated && (
+              <Link href="/orders" data-testid="link-my-orders">
+                <Button
+                  variant="ghost"
+                  className={location === "/orders" ? "bg-accent" : ""}
+                >
+                  My Orders
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Cart Icon, User & Theme Toggle */}
@@ -136,6 +146,17 @@ export default function Navbar({}: NavbarProps) {
                   </Button>
                 </Link>
               ))}
+              {isAuthenticated && (
+                <Link href="/orders">
+                  <Button
+                    variant="ghost"
+                    className={`w-full justify-start ${location === "/orders" ? "bg-accent" : ""}`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    My Orders
+                  </Button>
+                </Link>
+              )}
               {isAuthenticated ? (
                 <Button
                   variant="ghost"

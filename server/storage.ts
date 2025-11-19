@@ -23,6 +23,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: UpsertUser): Promise<User>;
   getAllUsers(): Promise<User[]>;
+  updateUser(id: string, user: Partial<UpsertUser>): Promise<User | undefined>; // Add this line
 
   // Contact submissions
   createContactSubmission(contact: InsertContact): Promise<ContactSubmission>;

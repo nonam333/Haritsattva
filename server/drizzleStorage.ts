@@ -59,6 +59,15 @@ export class DrizzleStorage implements IStorage {
     return this.db.select().from(schema.users);
   }
 
+  async updateUser(id: string, updateData: Partial<UpsertUser>): Promise<User | undefined> {
+    const [user] = await this.db
+      .update(schema.users)
+      .set({ ...updateData, updatedAt: new Date() })
+      .where(eq(schema.users.id, id))
+      .returning();
+    return user;
+  }
+
   // Contact submissions
   async createContactSubmission(insertContact: InsertContact): Promise<ContactSubmission> {
     const [contact] = await this.db.insert(schema.contactSubmissions).values(insertContact).returning();

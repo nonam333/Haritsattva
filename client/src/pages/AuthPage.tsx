@@ -1,19 +1,30 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useLocation } from "wouter";
+import { useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
 
-export default function SignupPage() {
+export default function AuthPage() {
+  const [location, setLocation] = useLocation();
+  const [isLogin, setIsLogin] = useState(location === '/login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const queryClient = useQueryClient(); // Get queryClient instance
+
+  useEffect(() => {
+    setIsLogin(location === '/login');
+  }, [location]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
+    const endpoint = isLogin ? '/api/auth/login' : '/api/auth/signup';
+
     try {
-      const response = await fetch('/api/auth/signup', {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -24,17 +35,26 @@ export default function SignupPage() {
         throw new Error(data.error || 'Something went wrong');
       }
 
-      // Handle successful signup, maybe redirect to login or home
-      window.location.href = '/'; // Redirect to home for now
+      // Invalidate relevant queries to force re-fetch and update UI
+      await queryClient.invalidateQueries({ queryKey: ["user"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/admin/check"] });
+
+      // Handle successful login/signup, redirect to home
+      setLocation("/");
     } catch (err: any) {
       setError(err.message);
     }
   };
 
+  const toggleForm = () => {
+    setIsLogin(!isLogin);
+    setLocation(isLogin ? '/signup' : '/login');
+  }
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md dark:bg-gray-800">
-        <h1 className="text-2xl font-bold text-center">Sign Up</h1>
+        <h1 className="text-2xl font-bold text-center">{isLogin ? 'Login' : 'Sign Up'}</h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <Label htmlFor="email">Email</Label>
@@ -57,8 +77,16 @@ export default function SignupPage() {
             />
           </div>
           {error && <p className="text-red-500">{error}</p>}
-          <Button type="submit" className="w-full">Sign Up</Button>
+          <Button type="submit" className="w-full">
+            {isLogin ? 'Login' : 'Sign Up'}
+          </Button>
         </form>
+        <p className="text-center text-sm">
+          {isLogin ? "Don't have an account? " : "Already have an account? "}
+          <button onClick={toggleForm} className="text-blue-500 hover:underline">
+            {isLogin ? 'Sign up' : 'Log in'}
+          </button>
+        </p>
       </div>
     </div>
   );

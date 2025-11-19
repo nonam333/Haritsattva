@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { useCart } from "@/contexts/CartContext";
@@ -9,12 +9,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth"; // Import useAuth
 
 export default function CheckoutPage() {
   const [, navigate] = useLocation();
   const { items, total, clearCart } = useCart();
   const { toast } = useToast();
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const { user } = useAuth(); // Use the useAuth hook
 
   const [formData, setFormData] = useState({
     shippingName: "",
@@ -27,6 +29,21 @@ export default function CheckoutPage() {
     paymentMethod: "cod",
     notes: "",
   });
+
+  useEffect(() => {
+    if (user) {
+      setFormData((prevData) => ({
+        ...prevData,
+        shippingName: user.shippingName || "",
+        shippingEmail: user.email || "", // Always use user.email if logged in
+        shippingPhone: user.shippingPhone || "",
+        shippingAddress: user.shippingAddress || "",
+        shippingCity: user.shippingCity || "",
+        shippingState: user.shippingState || "",
+        shippingZip: user.shippingZip || "",
+      }));
+    }
+  }, [user]); // Run when user object changes
 
   const createOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
@@ -241,7 +258,7 @@ export default function CheckoutPage() {
               <CardHeader>
                 <CardTitle>Payment Method</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-2">
                 <div className="flex items-center gap-2">
                   <input
                     type="radio"
@@ -254,6 +271,19 @@ export default function CheckoutPage() {
                     }
                   />
                   <Label htmlFor="cod">Cash on Delivery</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    id="upi"
+                    name="payment"
+                    value="upi"
+                    checked={formData.paymentMethod === "upi"}
+                    onChange={(e) =>
+                      setFormData({ ...formData, paymentMethod: e.target.value })
+                    }
+                  />
+                  <Label htmlFor="upi">UPI</Label>
                 </div>
               </CardContent>
             </Card>

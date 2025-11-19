@@ -11,6 +11,14 @@ export const users = pgTable("users", {
   role: varchar("role", { length: 20 }).notNull().default("user"), // 'user' | 'admin'
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+
+  // Shipping information
+  shippingName: text("shipping_name"),
+  shippingPhone: text("shipping_phone"),
+  shippingAddress: text("shipping_address"),
+  shippingCity: text("shipping_city"),
+  shippingState: text("shipping_state"),
+  shippingZip: text("shipping_zip"),
 });
 
 export const session = pgTable("session", {

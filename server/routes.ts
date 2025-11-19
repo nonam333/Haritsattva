@@ -10,19 +10,21 @@ import {
   users
 } from "@shared/schema";
 import { isAdmin } from "./adminAuth";
-import multer from "multer";
-import path from "path";
-import { promises as fs } from "fs";
+import { v2 as cloudinary } from "cloudinary";
 import { lucia } from "./auth";
 import { generateId } from "lucia";
 import { Argon2id } from "oslo/password";
 
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
 import { eq } from "drizzle-orm";
 
-
-
-export async function registerRoutes(app: Express): Promise<Server> {
-
+export function registerApiRoutes(app: Express) {
   // ============== AUTH ROUTES ==============
   app.post("/api/auth/signup", async (req, res) => {
     const { email, password } = req.body;
@@ -192,6 +194,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const order = await storage.createOrder(validatedOrder);
 
+      // Update user's shipping information
+      await storage.updateUser(userId, {
+        shippingName: req.body.shippingName,
+        shippingPhone: req.body.shippingPhone,
+        shippingAddress: req.body.shippingAddress,
+        shippingCity: req.body.shippingCity,
+        shippingState: req.body.shippingState,
+        shippingZip: req.body.shippingZip,
+      });
+
       // Create order items
       if (req.body.items && Array.isArray(req.body.items)) {
         for (const item of req.body.items) {
@@ -278,39 +290,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Image upload configuration
-  const upload = multer({
-    storage: multer.diskStorage({
-      destination: async (req, file, cb) => {
-        const uploadDir = path.join(process.cwd(), "attached_assets", "uploaded_images");
-        await fs.mkdir(uploadDir, { recursive: true });
-        cb(null, uploadDir);
-      },
-      filename: (req, file, cb) => {
-        const uniqueName = `${Date.now()}_${file.originalname}`;
-        cb(null, uniqueName);
-      },
-    }),
-    fileFilter: (req, file, cb) => {
-      if (file.mimetype.startsWith("image/")) {
-        cb(null, true);
-      } else {
-        cb(new Error("Only image files are allowed"));
-      }
-    },
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-  });
-
-  app.post("/api/admin/products/upload", isAdmin, upload.single("image"), async (req, res) => {
+  // Image upload endpoint using Cloudinary
+  app.post("/api/admin/products/upload", isAdmin, async (req, res) => {
     try {
-      if (!req.file) {
-        return res.status(400).json({ error: "No file uploaded" });
+      // Check if file data is present
+      if (!req.body.image) {
+        return res.status(400).json({ error: "No image data provided" });
       }
-      const imageUrl = `/attached_assets/uploaded_images/${req.file.filename}`;
-      res.json({ imageUrl });
+
+      // Upload to Cloudinary using base64 data
+      const uploadResult = await cloudinary.uploader.upload(req.body.image, {
+        folder: "haritsattva-products",
+        resource_type: "image",
+        transformation: [
+          { width: 800, height: 800, crop: "limit" },
+          { quality: "auto", fetch_format: "auto" }
+        ]
+      });
+
+      res.json({ imageUrl: uploadResult.secure_url });
     } catch (error) {
-      console.error("Upload error:", error);
-      res.status(500).json({ error: "Failed to upload image" });
+      console.error("Cloudinary upload error:", error);
+      res.status(500).json({ error: "Failed to upload image to cloud storage" });
     }
   });
 
@@ -475,8 +476,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to fetch analytics" });
     }
   });
+}
 
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  registerApiRoutes(app);
   const httpServer = createServer(app);
-
   return httpServer;
 }

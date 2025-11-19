@@ -26,7 +26,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="relative min-h-[450px] md:min-h-[550px] flex items-center justify-center overflow-hidden bg-gradient-to-br from-black to-gray-900">
+    <section className="relative min-h-[600px] md:min-h-[700px] flex items-center justify-center overflow-hidden bg-gradient-to-br from-black to-gray-900">
       {/* Background Image with Dark Overlay */}
       <div className="absolute inset-0">
         <img
@@ -42,20 +42,19 @@ export default function Hero() {
       {/* Content */}
       <div className="relative z-10 max-w-4xl mx-auto px-6 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div className="mb-6 flex justify-center">
-          <img
-            src="/logo.png"
-            alt="Haritsattva"
-            className="w-24 h-24 md:w-28 md:h-28 object-contain drop-shadow-2xl"
-          />
-        </div>
+                      <img
+                        src="/logo.png"
+                        alt="Haritsattva"
+                        className="w-24 h-24 object-contain filter invert(1)"
+                      />        </div>
         <h1
-          className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight"
+          className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight"
           data-testid="text-hero-title"
         >
           Fresh & Organic
         </h1>
         <p
-          className="text-base md:text-lg text-white/90 mb-6 max-w-2xl mx-auto"
+          className="text-base md:text-lg text-white/90 mb-8 max-w-2xl mx-auto"
           data-testid="text-hero-subtitle"
         >
           Premium quality fruits and vegetables delivered fresh to your doorstep.

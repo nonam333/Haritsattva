@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, Redirect, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -25,48 +25,56 @@ import ContactSubmissions from "@/pages/admin/ContactSubmissions";
 import UserManagement from "@/pages/admin/UserManagement";
 import NotFound from "@/pages/not-found";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
+import AuthPage from "./pages/AuthPage";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
+  if (isLoading) {
+    return <Route path="/" component={LandingPage} />;
+  }
+
   return (
     <Switch>
-      {isLoading ? (
-        <Route path="/" component={LandingPage} />
-      ) : !isAuthenticated ? (
-        <>
-          <Route path="/login" component={LoginPage} />
-          <Route path="/signup" component={SignupPage} />
-          <Route path="/" component={LandingPage} />
-        </>
-      ) : (
-        <>
-          <Route path="/" component={HomePage} />
-          <Route path="/products" component={ProductsPage} />
-          <Route path="/cart" component={CartPage} />
-          <Route path="/checkout" component={CheckoutPage} />
-          <Route path="/orders" component={OrderHistoryPage} />
-          <Route path="/policy" component={PolicyPage} />
-          <Route path="/about" component={AboutPage} />
-          <Route path="/contact" component={ContactPage} />
+      {/* Publicly accessible routes */}
+      <Route path="/login" component={AuthPage} />
+      <Route path="/signup" component={AuthPage} />
+      <Route path="/products" component={ProductsPage} />
+      <Route path="/policy" component={PolicyPage} />
+      <Route path="/about" component={AboutPage} />
+      <Route path="/contact" component={ContactPage} />
 
-          {/* Admin Routes */}
-          <ProtectedRoute path="/admin" component={AdminDashboard} />
-          <ProtectedRoute path="/admin/products" component={ProductManagement} />
-          <ProtectedRoute path="/admin/orders" component={OrderManagement} />
-          <ProtectedRoute path="/admin/categories" component={CategoryManagement} />
-          <ProtectedRoute path="/admin/contacts" component={ContactSubmissions} />
-          <ProtectedRoute path="/admin/users" component={UserManagement} />
-        </>
-      )}
+      {/* Authenticated Routes */}
+      <Route path="/cart">
+        {() => (isAuthenticated ? <CartPage /> : <Redirect to="/login" />)}
+      </Route>
+      <Route path="/checkout">
+        {() => (isAuthenticated ? <CheckoutPage /> : <Redirect to="/login" />)}
+      </Route>
+      <Route path="/orders">
+        {() => (isAuthenticated ? <OrderHistoryPage /> : <Redirect to="/login" />)}
+      </Route>
+
+      {/* Admin Routes */}
+      <ProtectedRoute path="/admin" component={AdminDashboard} />
+      <ProtectedRoute path="/admin/products" component={ProductManagement} />
+      <ProtectedRoute path="/admin/orders" component={OrderManagement} />
+      <ProtectedRoute path="/admin/categories" component={CategoryManagement} />
+      <ProtectedRoute path="/admin/contacts" component={ContactSubmissions} />
+      <ProtectedRoute path="/admin/users" component={UserManagement} />
+
+      {/* Conditional Home Page - MUST BE LAST before NOT FOUND */}
+      <Route path="/" component={isAuthenticated ? HomePage : LandingPage} />
+
+      {/* Fallback route */}
       <Route component={NotFound} />
     </Switch>
   );
 }
 
 function App() {
+  const [location] = useLocation(); // Get current location
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="light">
@@ -77,7 +85,7 @@ function App() {
               <main className="flex-1">
                 <Router />
               </main>
-              <Footer />
+              {!location.startsWith("/admin") && <Footer />} {/* Conditionally render Footer */}
             </div>
             <Toaster />
           </TooltipProvider>
