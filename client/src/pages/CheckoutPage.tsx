@@ -80,6 +80,13 @@ export default function CheckoutPage() {
       <div className="max-w-4xl mx-auto px-6 py-16">
         <Card>
           <CardContent className="py-16 text-center">
+            <div className="mb-4 flex justify-center">
+              <img
+                src="/logo.png"
+                alt="Haritsattva"
+                className="w-28 h-28 object-contain"
+              />
+            </div>
             <CheckCircle2 className="w-16 h-16 text-green-600 mx-auto mb-4" />
             <h1 className="text-3xl font-bold mb-4">Order Placed Successfully!</h1>
             <p className="text-muted-foreground mb-8">
@@ -107,6 +114,14 @@ export default function CheckoutPage() {
         <ArrowLeft className="mr-2 h-4 w-4" />
         Back to Cart
       </Button>
+
+      <div className="mb-6 flex justify-center">
+        <img
+          src="/logo.png"
+          alt="Haritsattva"
+          className="w-18 h-18 object-contain"
+        />
+      </div>
 
       <h1 className="text-3xl font-bold mb-8">Checkout</h1>
 

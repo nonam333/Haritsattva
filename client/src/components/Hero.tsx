@@ -41,6 +41,13 @@ export default function Hero() {
 
       {/* Content */}
       <div className="relative z-10 max-w-4xl mx-auto px-6 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="mb-6 flex justify-center">
+          <img
+            src="/logo.png"
+            alt="Haritsattva"
+            className="w-24 h-24 md:w-28 md:h-28 object-contain drop-shadow-2xl"
+          />
+        </div>
         <h1
           className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight"
           data-testid="text-hero-title"

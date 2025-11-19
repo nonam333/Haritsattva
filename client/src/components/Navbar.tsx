@@ -33,7 +33,7 @@ export default function Navbar({}: NavbarProps) {
           {/* Logo */}
           <Link href="/" data-testid="link-home">
             <div className="flex items-center gap-2 hover-elevate active-elevate-2 px-3 py-2 rounded-md cursor-pointer">
-              <Leaf className="w-6 h-6 text-primary" />
+              <img src="/logo.png" alt="Haritsattva" className="w-8 h-8 object-contain" />
               <span className="text-xl font-semibold text-foreground">Haritsattva</span>
             </div>
           </Link>

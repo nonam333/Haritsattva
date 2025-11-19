@@ -56,6 +56,13 @@ export default function ContactPage() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-16">
       <div className="mb-12">
+        <div className="mb-6 flex justify-center">
+          <img
+            src="/logo.png"
+            alt="Haritsattva"
+            className="w-24 h-24 object-contain"
+          />
+        </div>
         <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4" data-testid="text-page-title">
           Get in Touch
         </h1>

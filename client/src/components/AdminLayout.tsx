@@ -52,6 +52,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       >
         <div className="flex h-full flex-col gap-2 p-4">
           <div className="mb-4">
+            <div className="mb-4 flex justify-center">
+              <img
+                src="/logo.png"
+                alt="Haritsattva"
+                className="w-14 h-14 object-contain"
+              />
+            </div>
             <h2 className="text-lg font-semibold text-foreground">Admin Panel</h2>
             <p className="text-sm text-muted-foreground">Manage your store</p>
           </div>
