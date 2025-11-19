@@ -1,0 +1,160 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
+import { Link } from "wouter";
+
+// Product images
+import avocadoImage from "@assets/generated_images/Halved_avocado_product_8a3a377a.png";
+import tomatoImage from "@assets/generated_images/Fresh_tomatoes_product_d8a652a1.png";
+
+export default function CartPage() {
+  //todo: remove mock functionality
+  const [cartItems, setCartItems] = useState([
+    { id: "1", name: "Avocado", price: 2.99, quantity: 2, imageUrl: avocadoImage },
+    { id: "2", name: "Tomatoes", price: 4.99, quantity: 1, imageUrl: tomatoImage },
+  ]);
+
+  const updateQuantity = (id: string, change: number) => {
+    setCartItems(
+      cartItems
+        .map((item) =>
+          item.id === id
+            ? { ...item, quantity: Math.max(0, item.quantity + change) }
+            : item
+        )
+        .filter((item) => item.quantity > 0)
+    );
+  };
+
+  const removeItem = (id: string) => {
+    setCartItems(cartItems.filter((item) => item.id !== id));
+  };
+
+  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const deliveryFee = 5.0;
+  const total = subtotal + deliveryFee;
+
+  if (cartItems.length === 0) {
+    return (
+      <div className="max-w-7xl mx-auto px-6 py-20 text-center">
+        <ShoppingBag className="w-24 h-24 mx-auto text-muted-foreground mb-6" />
+        <h2 className="text-2xl font-bold text-foreground mb-4" data-testid="text-empty-cart">
+          Your cart is empty
+        </h2>
+        <p className="text-muted-foreground mb-8">
+          Add some fresh produce to get started!
+        </p>
+        <Link href="/products">
+          <Button size="lg" data-testid="button-browse-products">
+            Browse Products
+          </Button>
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto px-6 py-12">
+      <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-8" data-testid="text-page-title">
+        Cart
+      </h1>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Cart Items */}
+        <div className="lg:col-span-2 space-y-4">
+          {cartItems.map((item) => (
+            <Card key={item.id} data-testid={`card-cart-item-${item.id}`}>
+              <CardContent className="p-6">
+                <div className="flex gap-4 flex-wrap">
+                  <div className="w-24 h-24 rounded-md overflow-hidden bg-muted flex-shrink-0">
+                    <img
+                      src={item.imageUrl}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-lg text-foreground mb-1" data-testid={`text-item-name-${item.id}`}>
+                      {item.name}
+                    </h3>
+                    <p className="text-xl font-bold text-primary mb-4" data-testid={`text-item-price-${item.id}`}>
+                      ${item.price.toFixed(2)}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={() => updateQuantity(item.id, -1)}
+                        data-testid={`button-decrease-${item.id}`}
+                      >
+                        <Minus className="w-4 h-4" />
+                      </Button>
+                      <span className="w-12 text-center font-semibold" data-testid={`text-quantity-${item.id}`}>
+                        {item.quantity}
+                      </span>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={() => updateQuantity(item.id, 1)}
+                        data-testid={`button-increase-${item.id}`}
+                      >
+                        <Plus className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="ml-auto text-destructive hover:text-destructive"
+                        onClick={() => removeItem(item.id)}
+                        data-testid={`button-remove-${item.id}`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Order Summary */}
+        <div>
+          <Card className="sticky top-24">
+            <CardHeader>
+              <CardTitle>Order Summary</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span className="font-semibold" data-testid="text-subtotal">
+                  ${subtotal.toFixed(2)}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Delivery Fee</span>
+                <span className="font-semibold">${deliveryFee.toFixed(2)}</span>
+              </div>
+              <div className="border-t border-border pt-4">
+                <div className="flex justify-between text-lg font-bold">
+                  <span>Total</span>
+                  <span className="text-primary" data-testid="text-total">
+                    ${total.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+              <Button
+                className="w-full"
+                size="lg"
+                onClick={() => console.log("Proceeding to checkout")}
+                data-testid="button-checkout"
+              >
+                Checkout
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
