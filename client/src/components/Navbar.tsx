@@ -4,14 +4,14 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import ThemeToggle from "@/components/ThemeToggle";
+import { useCart } from "@/contexts/CartContext";
 
-interface NavbarProps {
-  cartItemCount?: number;
-}
+interface NavbarProps {}
 
-export default function Navbar({ cartItemCount = 0 }: NavbarProps) {
+export default function Navbar({}: NavbarProps) {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { totalItems } = useCart();
 
   const navLinks = [
     { path: "/", label: "Home" },
@@ -53,13 +53,13 @@ export default function Navbar({ cartItemCount = 0 }: NavbarProps) {
             <Link href="/cart" data-testid="link-cart">
               <Button size="icon" variant="ghost" className="relative">
                 <ShoppingCart className="w-5 h-5" />
-                {cartItemCount > 0 && (
+                {totalItems > 0 && (
                   <Badge
                     variant="default"
                     className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
                     data-testid="badge-cart-count"
                   >
-                    {cartItemCount}
+                    {totalItems}
                   </Badge>
                 )}
               </Button>

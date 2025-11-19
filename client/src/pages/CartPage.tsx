@@ -1,41 +1,17 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import { Link } from "wouter";
-
-// Product images
-import avocadoImage from "@assets/generated_images/Halved_avocado_product_8a3a377a.png";
-import tomatoImage from "@assets/generated_images/Fresh_tomatoes_product_d8a652a1.png";
+import { useCart } from "@/contexts/CartContext";
 
 export default function CartPage() {
-  //todo: remove mock functionality
-  const [cartItems, setCartItems] = useState([
-    { id: "1", name: "Avocado", price: 2.99, quantity: 2, imageUrl: avocadoImage },
-    { id: "2", name: "Tomatoes", price: 4.99, quantity: 1, imageUrl: tomatoImage },
-  ]);
+  const { items, updateQuantity, removeFromCart } = useCart();
 
-  const updateQuantity = (id: string, change: number) => {
-    setCartItems(
-      cartItems
-        .map((item) =>
-          item.id === id
-            ? { ...item, quantity: Math.max(0, item.quantity + change) }
-            : item
-        )
-        .filter((item) => item.quantity > 0)
-    );
-  };
-
-  const removeItem = (id: string) => {
-    setCartItems(cartItems.filter((item) => item.id !== id));
-  };
-
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const deliveryFee = 5.0;
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const deliveryFee = 50.0;
   const total = subtotal + deliveryFee;
 
-  if (cartItems.length === 0) {
+  if (items.length === 0) {
     return (
       <div className="max-w-7xl mx-auto px-6 py-20 text-center">
         <ShoppingBag className="w-24 h-24 mx-auto text-muted-foreground mb-6" />
@@ -63,7 +39,7 @@ export default function CartPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Cart Items */}
         <div className="lg:col-span-2 space-y-4">
-          {cartItems.map((item) => (
+          {items.map((item) => (
             <Card key={item.id} data-testid={`card-cart-item-${item.id}`}>
               <CardContent className="p-6">
                 <div className="flex gap-4 flex-wrap">
@@ -79,13 +55,13 @@ export default function CartPage() {
                       {item.name}
                     </h3>
                     <p className="text-xl font-bold text-primary mb-4" data-testid={`text-item-price-${item.id}`}>
-                      ${item.price.toFixed(2)}
+                      ₹{item.price.toFixed(2)}
                     </p>
                     <div className="flex items-center gap-2">
                       <Button
                         size="icon"
                         variant="outline"
-                        onClick={() => updateQuantity(item.id, -1)}
+                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
                         data-testid={`button-decrease-${item.id}`}
                       >
                         <Minus className="w-4 h-4" />
@@ -96,7 +72,7 @@ export default function CartPage() {
                       <Button
                         size="icon"
                         variant="outline"
-                        onClick={() => updateQuantity(item.id, 1)}
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
                         data-testid={`button-increase-${item.id}`}
                       >
                         <Plus className="w-4 h-4" />
@@ -105,7 +81,7 @@ export default function CartPage() {
                         size="icon"
                         variant="ghost"
                         className="ml-auto text-destructive hover:text-destructive"
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => removeFromCart(item.id)}
                         data-testid={`button-remove-${item.id}`}
                       >
                         <Trash2 className="w-4 h-4" />
@@ -128,18 +104,18 @@ export default function CartPage() {
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Subtotal</span>
                 <span className="font-semibold" data-testid="text-subtotal">
-                  ${subtotal.toFixed(2)}
+                  ₹{subtotal.toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Delivery Fee</span>
-                <span className="font-semibold">${deliveryFee.toFixed(2)}</span>
+                <span className="font-semibold">₹{deliveryFee.toFixed(2)}</span>
               </div>
               <div className="border-t border-border pt-4">
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total</span>
                   <span className="text-primary" data-testid="text-total">
-                    ${total.toFixed(2)}
+                    ₹{total.toFixed(2)}
                   </span>
                 </div>
               </div>

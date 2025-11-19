@@ -1,5 +1,10 @@
 import Navbar from '../Navbar';
+import { CartProvider } from '@/contexts/CartContext';
 
 export default function NavbarExample() {
-  return <Navbar cartItemCount={3} />;
+  return (
+    <CartProvider>
+      <Navbar />
+    </CartProvider>
+  );
 }

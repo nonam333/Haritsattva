@@ -1,4 +1,3 @@
-import { useState } from "react";
 import Hero from "@/components/Hero";
 import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
@@ -13,39 +12,32 @@ import avocadoImage from "@assets/generated_images/Halved_avocado_product_8a3a37
 
 export default function HomePage() {
   //todo: remove mock functionality
-  const [cartCount, setCartCount] = useState(0);
-
-  //todo: remove mock functionality
   const featuredProducts = [
     {
       id: "1",
       name: "Bell Pepper",
-      price: 3.99,
+      price: 99.00,
       imageUrl: bellPepperImage,
     },
     {
       id: "2",
-      name: "Carrot",
-      price: 1.99,
+      name: "Carrot Bundle",
+      price: 49.00,
       imageUrl: carrotImage,
     },
     {
       id: "3",
       name: "Broccoli",
-      price: 2.49,
+      price: 65.00,
       imageUrl: broccoliImage,
     },
     {
       id: "4",
       name: "Avocado",
-      price: 2.99,
+      price: 85.00,
       imageUrl: avocadoImage,
     },
   ];
-
-  const handleAddToCart = () => {
-    setCartCount(cartCount + 1);
-  };
 
   return (
     <div>
@@ -75,7 +67,6 @@ export default function HomePage() {
             <ProductCard
               key={product.id}
               {...product}
-              onAddToCart={handleAddToCart}
             />
           ))}
         </div>

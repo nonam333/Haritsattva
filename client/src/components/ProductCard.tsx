@@ -2,13 +2,14 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Link } from "wouter";
+import { useCart } from "@/contexts/CartContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProductCardProps {
   id: string;
   name: string;
   price: number;
   imageUrl: string;
-  onAddToCart?: () => void;
 }
 
 export default function ProductCard({
@@ -16,8 +17,18 @@ export default function ProductCard({
   name,
   price,
   imageUrl,
-  onAddToCart,
 }: ProductCardProps) {
+  const { addToCart } = useCart();
+  const { toast } = useToast();
+
+  const handleAddToCart = () => {
+    addToCart({ id, name, price, imageUrl });
+    toast({
+      title: "Added to cart",
+      description: `${name} has been added to your cart.`,
+    });
+  };
+
   return (
     <Card className="overflow-hidden hover-elevate transition-all duration-300 group" data-testid={`card-product-${id}`}>
       <Link href={`/product/${id}`}>
@@ -40,17 +51,14 @@ export default function ProductCard({
           </h3>
         </Link>
         <p className="text-xl font-bold text-primary" data-testid={`text-product-price-${id}`}>
-          ${price.toFixed(2)}
+          ₹{price.toFixed(2)}
         </p>
       </CardContent>
       <CardFooter className="p-4 pt-0">
         <Button
           className="w-full"
           variant="default"
-          onClick={() => {
-            onAddToCart?.();
-            console.log(`Added ${name} to cart`);
-          }}
+          onClick={handleAddToCart}
           data-testid={`button-add-to-cart-${id}`}
         >
           <Plus className="w-4 h-4 mr-2" />

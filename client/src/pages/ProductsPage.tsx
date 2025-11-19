@@ -16,12 +16,12 @@ export default function ProductsPage() {
 
   //todo: remove mock functionality
   const products = [
-    { id: "1", name: "Bell Pepper", price: 3.99, category: "vegetables", imageUrl: bellPepperImage },
-    { id: "2", name: "Carrot Bundle", price: 1.99, category: "vegetables", imageUrl: carrotImage },
-    { id: "3", name: "Broccoli", price: 2.49, category: "vegetables", imageUrl: broccoliImage },
-    { id: "4", name: "Avocado", price: 2.99, category: "fruits", imageUrl: avocadoImage },
-    { id: "5", name: "Tomatoes", price: 4.99, category: "vegetables", imageUrl: tomatoImage },
-    { id: "6", name: "Strawberries", price: 5.99, category: "fruits", imageUrl: strawberryImage },
+    { id: "1", name: "Bell Pepper", price: 99.00, category: "vegetables", imageUrl: bellPepperImage },
+    { id: "2", name: "Carrot Bundle", price: 49.00, category: "vegetables", imageUrl: carrotImage },
+    { id: "3", name: "Broccoli", price: 65.00, category: "vegetables", imageUrl: broccoliImage },
+    { id: "4", name: "Avocado", price: 85.00, category: "fruits", imageUrl: avocadoImage },
+    { id: "5", name: "Tomatoes", price: 120.00, category: "vegetables", imageUrl: tomatoImage },
+    { id: "6", name: "Strawberries", price: 150.00, category: "fruits", imageUrl: strawberryImage },
   ];
 
   const categories = [
@@ -64,7 +64,6 @@ export default function ProductsPage() {
           <ProductCard
             key={product.id}
             {...product}
-            onAddToCart={() => console.log(`Added ${product.name} to cart`)}
           />
         ))}
       </div>
