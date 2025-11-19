@@ -1,0 +1,25 @@
+[build]
+  command = "npm run build"
+  publish = "dist/public"
+  functions = ".netlify/functions"
+
+[functions]
+  # Include native node modules at runtime
+  included_files = ["node_modules/@node-rs/**/*.node"]
+  node_bundler = "none"
+
+[dev]
+  command = "npm run dev"
+  targetPort = 5000
+  publish = "dist"
+  framework = "#static"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

@@ -9,3 +9,4 @@ vite.config.ts.*
 .env.*.local
 .local/
 attached_assets/uploaded_images/
+.netlify
