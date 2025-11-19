@@ -4,3 +4,8 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+.env
+.env.local
+.env.*.local
+.local/
+attached_assets/uploaded_images/

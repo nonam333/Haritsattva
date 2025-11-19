@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { ShoppingCart, Menu, X, Leaf, LogOut } from "lucide-react";
+import { ShoppingCart, Menu, X, Leaf, LogOut, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 interface NavbarProps {}
 
@@ -15,6 +16,7 @@ export default function Navbar({}: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { totalItems } = useCart();
   const { user, isAuthenticated } = useAuth();
+  const { isAdmin } = useIsAdmin();
 
   const navLinks = [
     { path: "/", label: "Home" },
@@ -55,6 +57,13 @@ export default function Navbar({}: NavbarProps) {
             <ThemeToggle />
             {isAuthenticated && (
               <>
+                {isAdmin && (
+                  <Link href="/admin" data-testid="link-admin">
+                    <Button size="icon" variant="ghost" title="Admin Panel">
+                      <Shield className="w-5 h-5" />
+                    </Button>
+                  </Link>
+                )}
                 <Link href="/cart" data-testid="link-cart">
                   <Button size="icon" variant="ghost" className="relative">
                     <ShoppingCart className="w-5 h-5" />

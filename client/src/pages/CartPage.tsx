@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useCart } from "@/contexts/CartContext";
 
 export default function CartPage() {
+  const [, navigate] = useLocation();
   const { items, updateQuantity, removeFromCart } = useCart();
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -127,11 +128,19 @@ export default function CartPage() {
               <Button
                 className="w-full"
                 size="lg"
-                onClick={() => console.log("Proceeding to checkout")}
+                onClick={() => navigate("/checkout")}
                 data-testid="button-checkout"
               >
-                Checkout
+                Proceed to Checkout
               </Button>
+              <Link href="/products">
+                <Button
+                  className="w-full"
+                  variant="outline"
+                >
+                  Continue Shopping
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         </div>

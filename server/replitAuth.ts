@@ -7,6 +7,7 @@ import type { Express, RequestHandler } from "express";
 import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
+import { checkAdminEmail } from "./adminAuth";
 
 const getOidcConfig = memoize(
   async () => {
@@ -60,16 +61,34 @@ function updateUserSession(
 async function upsertUser(
   claims: any,
 ) {
+  const email = claims["email"];
+  const role = checkAdminEmail(email) ? "admin" : "user";
+
   await storage.upsertUser({
     id: claims["sub"],
-    email: claims["email"],
+    email: email,
     firstName: claims["first_name"],
     lastName: claims["last_name"],
     profileImageUrl: claims["profile_image_url"],
+    role: role,
   });
 }
 
 export async function setupAuth(app: Express) {
+  // Skip OAuth setup in local development mode
+  if (process.env.NODE_ENV === "development") {
+    app.set("trust proxy", 1);
+    app.use(getSession());
+    app.use(passport.initialize());
+    app.use(passport.session());
+
+    // Mock passport serialization for development
+    passport.serializeUser((user: Express.User, cb) => cb(null, user));
+    passport.deserializeUser((user: Express.User, cb) => cb(null, user));
+
+    return; // Skip the rest of the OAuth setup
+  }
+
   app.set("trust proxy", 1);
   app.use(getSession());
   app.use(passport.initialize());
@@ -140,6 +159,22 @@ export async function setupAuth(app: Express) {
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
+  // LOCAL DEVELOPMENT MODE - Mock authentication
+  // TODO: Remove this before deploying to production!
+  if (process.env.NODE_ENV === "development") {
+    (req as any).user = {
+      claims: {
+        sub: "local-test-user-123",
+        email: "harshraisjc@gmail.com", // Your admin email
+        first_name: "Harsh",
+        last_name: "Rai",
+        profile_image_url: null
+      }
+    };
+    return next();
+  }
+
+  // Production authentication flow
   const user = req.user as any;
 
   if (!req.isAuthenticated() || !user.expires_at) {
