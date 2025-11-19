@@ -1,10 +1,12 @@
 import { Link, useLocation } from "wouter";
-import { ShoppingCart, Menu, X, Leaf } from "lucide-react";
+import { ShoppingCart, Menu, X, Leaf, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/hooks/useAuth";
 
 interface NavbarProps {}
 
@@ -12,6 +14,7 @@ export default function Navbar({}: NavbarProps) {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { totalItems } = useCart();
+  const { user, isAuthenticated } = useAuth();
 
   const navLinks = [
     { path: "/", label: "Home" },
@@ -47,23 +50,43 @@ export default function Navbar({}: NavbarProps) {
             ))}
           </div>
 
-          {/* Cart Icon & Theme Toggle */}
+          {/* Cart Icon, User & Theme Toggle */}
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <Link href="/cart" data-testid="link-cart">
-              <Button size="icon" variant="ghost" className="relative">
-                <ShoppingCart className="w-5 h-5" />
-                {totalItems > 0 && (
-                  <Badge
-                    variant="default"
-                    className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-                    data-testid="badge-cart-count"
+            {isAuthenticated && (
+              <>
+                <Link href="/cart" data-testid="link-cart">
+                  <Button size="icon" variant="ghost" className="relative">
+                    <ShoppingCart className="w-5 h-5" />
+                    {totalItems > 0 && (
+                      <Badge
+                        variant="default"
+                        className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                        data-testid="badge-cart-count"
+                      >
+                        {totalItems}
+                      </Badge>
+                    )}
+                  </Button>
+                </Link>
+                <div className="hidden md:flex items-center gap-3 ml-2">
+                  <Avatar className="w-8 h-8">
+                    <AvatarImage src={user?.profileImageUrl || undefined} className="object-cover" />
+                    <AvatarFallback>
+                      {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => window.location.href = "/api/logout"}
+                    data-testid="button-logout"
                   >
-                    {totalItems}
-                  </Badge>
-                )}
-              </Button>
-            </Link>
+                    <LogOut className="w-5 h-5" />
+                  </Button>
+                </div>
+              </>
+            )}
 
             {/* Mobile Menu Button */}
             <Button
@@ -93,6 +116,16 @@ export default function Navbar({}: NavbarProps) {
                   </Button>
                 </Link>
               ))}
+              {isAuthenticated && (
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-destructive hover:text-destructive"
+                  onClick={() => window.location.href = "/api/logout"}
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </Button>
+              )}
             </div>
           </div>
         )}

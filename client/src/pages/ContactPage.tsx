@@ -6,33 +6,63 @@ import { Label } from "@/components/ui/label";
 import { Mail, Phone, Clock, MapPin } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { useMutation } from "@tanstack/react-query";
+
+interface ContactFormData {
+  name: string;
+  email: string;
+  phone?: string;
+  message: string;
+}
 
 export default function ContactPage() {
   const { toast } = useToast();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ContactFormData>({
     name: "",
     email: "",
+    phone: "",
     message: "",
+  });
+
+  const contactMutation = useMutation({
+    mutationFn: async (data: ContactFormData) => {
+      return await apiRequest("/api/contact", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Message sent successfully!",
+        description: "We'll get back to you as soon as possible.",
+      });
+      setFormData({ name: "", email: "", phone: "", message: "" });
+    },
+    onError: () => {
+      toast({
+        title: "Failed to send message",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    toast({
-      title: "Message sent!",
-      description: "We'll get back to you as soon as possible.",
-    });
-    setFormData({ name: "", email: "", message: "" });
+    contactMutation.mutate(formData);
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12">
-      <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4" data-testid="text-page-title">
-        Contact Us
-      </h1>
-      <p className="text-muted-foreground mb-12">
-        Feel free to get in touch with us. We're here to help!
-      </p>
+    <div className="max-w-7xl mx-auto px-6 py-16">
+      <div className="mb-12">
+        <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4" data-testid="text-page-title">
+          Get in Touch
+        </h1>
+        <p className="text-muted-foreground text-lg">
+          Have questions? We're here to help! Reach out to us anytime.
+        </p>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Contact Form */}
@@ -44,7 +74,7 @@ export default function ContactPage() {
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
+                  <Label htmlFor="name">Full Name *</Label>
                   <Input
                     id="name"
                     placeholder="Your name"
@@ -57,7 +87,7 @@ export default function ContactPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">Email Address *</Label>
                   <Input
                     id="email"
                     type="email"
@@ -71,7 +101,20 @@ export default function ContactPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="message">Message</Label>
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="+91 98765 43210"
+                    value={formData.phone}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
+                    data-testid="input-phone"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="message">Message *</Label>
                   <Textarea
                     id="message"
                     placeholder="How can we help you?"
@@ -84,8 +127,14 @@ export default function ContactPage() {
                     data-testid="input-message"
                   />
                 </div>
-                <Button type="submit" className="w-full" size="lg" data-testid="button-submit">
-                  Send Message
+                <Button 
+                  type="submit" 
+                  className="w-full shadow-md hover:shadow-lg transition-all" 
+                  size="lg" 
+                  disabled={contactMutation.isPending}
+                  data-testid="button-submit"
+                >
+                  {contactMutation.isPending ? "Sending..." : "Send Message"}
                 </Button>
               </form>
             </CardContent>

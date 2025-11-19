@@ -31,10 +31,15 @@ export default function CartPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12">
-      <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-8" data-testid="text-page-title">
-        Cart
-      </h1>
+    <div className="max-w-7xl mx-auto px-6 py-16">
+      <div className="mb-12">
+        <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4" data-testid="text-page-title">
+          Shopping Cart
+        </h1>
+        <p className="text-muted-foreground text-lg">
+          Review your items and proceed to checkout
+        </p>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Cart Items */}

@@ -6,12 +6,12 @@ export default function AboutPage() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary/10 to-accent py-20">
+      <section className="bg-gradient-to-br from-primary/10 to-accent py-24">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6" data-testid="text-page-title">
-            About Us
+            About Haritsattva
           </h1>
-          <p className="text-lg text-muted-foreground leading-relaxed">
+          <p className="text-xl text-muted-foreground leading-relaxed">
             Haritsattva provides ultra-fresh, organic, and sustainably sourced produce,
             enhancing health, environmental sustainability, and community well-being.
           </p>
@@ -19,7 +19,7 @@ export default function AboutPage() {
       </section>
 
       {/* Mission Section */}
-      <section className="max-w-7xl mx-auto px-6 py-20">
+      <section className="max-w-7xl mx-auto px-6 py-24">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           <div className="text-center">
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -57,7 +57,7 @@ export default function AboutPage() {
       </section>
 
       {/* Our Story Section */}
-      <section className="bg-muted py-20">
+      <section className="bg-muted py-24">
         <div className="max-w-4xl mx-auto px-6">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-8 text-center">
             Our Story

@@ -36,22 +36,26 @@ export default function ProductsPage() {
       : products.filter((p) => p.category === selectedCategory);
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12">
-      <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4" data-testid="text-page-title">
-        Our Products
-      </h1>
-      <p className="text-muted-foreground mb-8">
-        Browse our selection of fresh, organic produce
-      </p>
+    <div className="max-w-7xl mx-auto px-6 py-16">
+      <div className="mb-12">
+        <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4" data-testid="text-page-title">
+          Our Products
+        </h1>
+        <p className="text-muted-foreground text-lg">
+          Browse our selection of fresh, organic produce
+        </p>
+      </div>
 
       {/* Category Filter */}
-      <div className="flex gap-2 mb-8 flex-wrap">
+      <div className="flex gap-3 mb-12 flex-wrap">
         {categories.map((category) => (
           <Button
             key={category.id}
             variant={selectedCategory === category.id ? "default" : "outline"}
+            size="lg"
             onClick={() => setSelectedCategory(category.id)}
             data-testid={`button-category-${category.id}`}
+            className="shadow-sm hover:shadow-md transition-all"
           >
             {category.label}
           </Button>
@@ -59,7 +63,7 @@ export default function ProductsPage() {
       </div>
 
       {/* Products Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
         {filteredProducts.map((product) => (
           <ProductCard
             key={product.id}

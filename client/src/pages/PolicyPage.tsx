@@ -7,13 +7,15 @@ import {
 
 export default function PolicyPage() {
   return (
-    <div className="max-w-3xl mx-auto px-6 py-12">
-      <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4" data-testid="text-page-title">
-        Policy
-      </h1>
-      <p className="text-muted-foreground mb-8">
-        Important information about our privacy, terms, and return policies
-      </p>
+    <div className="max-w-3xl mx-auto px-6 py-16">
+      <div className="mb-12">
+        <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4" data-testid="text-page-title">
+          Our Policies
+        </h1>
+        <p className="text-muted-foreground text-lg">
+          Important information about our privacy, terms, and return policies
+        </p>
+      </div>
 
       <Accordion type="single" collapsible className="w-full space-y-4">
         <AccordionItem value="privacy" className="border rounded-md px-6">
