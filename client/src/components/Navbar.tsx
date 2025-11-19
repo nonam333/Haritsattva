@@ -55,7 +55,7 @@ export default function Navbar({}: NavbarProps) {
           {/* Cart Icon, User & Theme Toggle */}
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            {isAuthenticated && (
+            {isAuthenticated ? (
               <>
                 {isAdmin && (
                   <Link href="/admin" data-testid="link-admin">
@@ -80,21 +80,32 @@ export default function Navbar({}: NavbarProps) {
                 </Link>
                 <div className="hidden md:flex items-center gap-3 ml-2">
                   <Avatar className="w-8 h-8">
-                    <AvatarImage src={user?.profileImageUrl || undefined} className="object-cover" />
                     <AvatarFallback>
-                      {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
+                      {user?.email?.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <Button
                     size="icon"
                     variant="ghost"
-                    onClick={() => window.location.href = "/api/logout"}
+                    onClick={async () => {
+                      await fetch('/api/auth/logout', { method: 'POST' });
+                      window.location.href = '/login';
+                    }}
                     data-testid="button-logout"
                   >
                     <LogOut className="w-5 h-5" />
                   </Button>
                 </div>
               </>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Link href="/login">
+                  <Button variant="ghost">Login</Button>
+                </Link>
+                <Link href="/signup">
+                  <Button>Sign Up</Button>
+                </Link>
+              </div>
             )}
 
             {/* Mobile Menu Button */}
@@ -125,15 +136,27 @@ export default function Navbar({}: NavbarProps) {
                   </Button>
                 </Link>
               ))}
-              {isAuthenticated && (
+              {isAuthenticated ? (
                 <Button
                   variant="ghost"
                   className="w-full justify-start text-destructive hover:text-destructive"
-                  onClick={() => window.location.href = "/api/logout"}
+                  onClick={async () => {
+                    await fetch('/api/auth/logout', { method: 'POST' });
+                    window.location.href = '/login';
+                  }}
                 >
                   <LogOut className="w-4 h-4 mr-2" />
                   Sign Out
                 </Button>
+              ) : (
+                <>
+                  <Link href="/login">
+                    <Button variant="ghost" className="w-full justify-start" onClick={() => setMobileMenuOpen(false)}>Login</Button>
+                  </Link>
+                  <Link href="/signup">
+                    <Button className="w-full justify-start" onClick={() => setMobileMenuOpen(false)}>Sign Up</Button>
+                  </Link>
+                </>
               )}
             </div>
           </div>

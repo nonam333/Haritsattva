@@ -24,14 +24,23 @@ import CategoryManagement from "@/pages/admin/CategoryManagement";
 import ContactSubmissions from "@/pages/admin/ContactSubmissions";
 import UserManagement from "@/pages/admin/UserManagement";
 import NotFound from "@/pages/not-found";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
   return (
     <Switch>
-      {isLoading || !isAuthenticated ? (
+      {isLoading ? (
         <Route path="/" component={LandingPage} />
+      ) : !isAuthenticated ? (
+        <>
+          <Route path="/login" component={LoginPage} />
+          <Route path="/signup" component={SignupPage} />
+          <Route path="/" component={LandingPage} />
+        </>
       ) : (
         <>
           <Route path="/" component={HomePage} />
@@ -44,12 +53,12 @@ function Router() {
           <Route path="/contact" component={ContactPage} />
 
           {/* Admin Routes */}
-          <Route path="/admin" component={AdminDashboard} />
-          <Route path="/admin/products" component={ProductManagement} />
-          <Route path="/admin/orders" component={OrderManagement} />
-          <Route path="/admin/categories" component={CategoryManagement} />
-          <Route path="/admin/contacts" component={ContactSubmissions} />
-          <Route path="/admin/users" component={UserManagement} />
+          <ProtectedRoute path="/admin" component={AdminDashboard} />
+          <ProtectedRoute path="/admin/products" component={ProductManagement} />
+          <ProtectedRoute path="/admin/orders" component={OrderManagement} />
+          <ProtectedRoute path="/admin/categories" component={CategoryManagement} />
+          <ProtectedRoute path="/admin/contacts" component={ContactSubmissions} />
+          <ProtectedRoute path="/admin/users" component={UserManagement} />
         </>
       )}
       <Route component={NotFound} />

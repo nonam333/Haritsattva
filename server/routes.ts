@@ -6,43 +6,99 @@ import {
   insertProductSchema,
   insertCategorySchema,
   insertOrderSchema,
-  insertOrderItemSchema
+  insertOrderItemSchema,
+  users
 } from "@shared/schema";
-import { setupAuth, isAuthenticated } from "./replitAuth";
 import { isAdmin } from "./adminAuth";
 import multer from "multer";
 import path from "path";
 import { promises as fs } from "fs";
+import { lucia } from "./auth";
+import { generateId } from "lucia";
+import { Argon2id } from "oslo/password";
+
+import { eq } from "drizzle-orm";
+
+
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  await setupAuth(app);
 
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  // ============== AUTH ROUTES ==============
+  app.post("/api/auth/signup", async (req, res) => {
+    const { email, password } = req.body;
+    if (!email || !password || typeof email !== "string" || typeof password !== "string") {
+      return res.status(400).json({ error: "Invalid input" });
+    }
+    const hashedPassword = await new Argon2id().hash(password);
+    const userId = generateId(15);
+
     try {
-      const userId = req.user.claims.sub;
-      const userEmail = req.user.claims.email;
+      await storage.createUser({
+        id: userId,
+        email,
+        hashed_password: hashedPassword,
+        role: 'user'
+      });
 
-      // In development mode, create/return mock user directly
-      if (process.env.NODE_ENV === "development") {
-        const mockUser = await storage.upsertUser({
-          id: userId,
-          email: userEmail,
-          firstName: req.user.claims.first_name || "Test",
-          lastName: req.user.claims.last_name || "User",
-          profileImageUrl: req.user.claims.profile_image_url || null,
-        });
-        return res.json(mockUser);
-      }
-
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
+      const session = await lucia.createSession(userId, {});
+      const sessionCookie = lucia.createSessionCookie(session.id);
+      res.appendHeader("Set-Cookie", sessionCookie.serialize());
+      return res.status(201).json({ success: true });
+    } catch (e) {
+      // db error, email taken
+      return res.status(400).json({ error: "Email already in use" });
     }
   });
+
+  app.post("/api/auth/login", async (req, res) => {
+		const { email, password } = req.body;
+		if (!email || !password || typeof email !== "string" || typeof password !== "string") {
+			return res.status(400).json({ error: "Invalid input" });
+		}
+
+		const existingUser = await storage.getUserByEmail(email);
+		if (!existingUser) {
+			return res.status(400).json({
+				error: "Incorrect email or password"
+			});
+		}
+
+		const validPassword = await new Argon2id().verify(existingUser.hashed_password, password);
+		if (!validPassword) {
+			return res.status(400).json({
+				error: "Incorrect email or password"
+			});
+		}
+
+		const session = await lucia.createSession(existingUser.id, {});
+		const sessionCookie = lucia.createSessionCookie(session.id);
+		res.appendHeader("Set-Cookie", sessionCookie.serialize());
+		return res.status(200).json({ success: true });
+	});
+
+  app.post("/api/auth/logout", async (req, res) => {
+		const sessionCookie = lucia.createBlankSessionCookie();
+		res.appendHeader("Set-Cookie", sessionCookie.serialize());
+		return res.status(200).json({ success: true });
+	});
+
+  app.get("/api/auth/user", async (req, res) => {
+    const sessionId = lucia.readSessionCookie(req.headers.cookie ?? "");
+    if (!sessionId) {
+      return res.status(401).json({ user: null });
+    }
+    const { session, user } = await lucia.validateSession(sessionId);
+    if (session && session.fresh) {
+      const sessionCookie = lucia.createSessionCookie(session.id);
+      res.appendHeader("Set-Cookie", sessionCookie.serialize());
+    }
+    if (!session) {
+      const sessionCookie = lucia.createBlankSessionCookie();
+      res.appendHeader("Set-Cookie", sessionCookie.serialize());
+    }
+    return res.status(200).json({ user });
+  });
+
 
   // Contact form submission
   app.post("/api/contact", async (req, res) => {
@@ -56,8 +112,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.use(async (req, res, next) => {
+    const sessionId = lucia.readSessionCookie(req.headers.cookie ?? "");
+    if (!sessionId) {
+      res.locals.user = null;
+      res.locals.session = null;
+      return next();
+    }
+
+    const { session, user } = await lucia.validateSession(sessionId);
+    if (session && session.fresh) {
+      const sessionCookie = lucia.createSessionCookie(session.id);
+      res.appendHeader("Set-Cookie", sessionCookie.serialize());
+    }
+    if (!session) {
+      const sessionCookie = lucia.createBlankSessionCookie();
+      res.appendHeader("Set-Cookie", sessionCookie.serialize());
+    }
+    res.locals.session = session;
+    res.locals.user = user;
+    return next();
+  });
+
   // Get all contact submissions (protected - for admin)
-  app.get("/api/contact/submissions", isAuthenticated, async (req, res) => {
+  app.get("/api/contact/submissions", isAdmin, async (req, res) => {
     try {
       const submissions = await storage.getAllContactSubmissions();
       res.json(submissions);
@@ -103,9 +181,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ============== PUBLIC ORDER ROUTES (for checkout) ==============
-  app.post("/api/orders", isAuthenticated, async (req: any, res) => {
+  app.post("/api/orders", async (req: any, res) => {
+    if (!res.locals.user) return res.status(401).json({ error: "Unauthorized" });
     try {
-      const userId = req.user.claims.sub;
+      const userId = res.locals.user.id;
       const validatedOrder = insertOrderSchema.parse({
         ...req.body,
         userId,
@@ -133,9 +212,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/orders/my-orders", isAuthenticated, async (req: any, res) => {
+  app.get("/api/orders/my-orders", async (req: any, res) => {
+    if (!res.locals.user) return res.status(401).json({ error: "Unauthorized" });
     try {
-      const userId = req.user.claims.sub;
+      const userId = res.locals.user.id;
       const orders = await storage.getOrdersByUserId(userId);
 
       // Fetch order items for each order
@@ -156,12 +236,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ============== ADMIN ROUTES ==============
 
   // Check if user is admin
-  app.get("/api/admin/check", isAuthenticated, isAdmin, async (req, res) => {
+  app.get("/api/admin/check", isAdmin, async (req, res) => {
     res.json({ isAdmin: true });
   });
 
   // Admin Products
-  app.post("/api/admin/products", isAuthenticated, isAdmin, async (req, res) => {
+  app.post("/api/admin/products", isAdmin, async (req, res) => {
     try {
       const validatedProduct = insertProductSchema.parse(req.body);
       const product = await storage.createProduct(validatedProduct);
@@ -172,7 +252,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/products/:id", isAuthenticated, isAdmin, async (req, res) => {
+  app.put("/api/admin/products/:id", isAdmin, async (req, res) => {
     try {
       const product = await storage.updateProduct(req.params.id, req.body);
       if (!product) {
@@ -185,7 +265,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/products/:id", isAuthenticated, isAdmin, async (req, res) => {
+  app.delete("/api/admin/products/:id", isAdmin, async (req, res) => {
     try {
       const success = await storage.deleteProduct(req.params.id);
       if (!success) {
@@ -221,7 +301,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   });
 
-  app.post("/api/admin/products/upload", isAuthenticated, isAdmin, upload.single("image"), async (req, res) => {
+  app.post("/api/admin/products/upload", isAdmin, upload.single("image"), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
@@ -235,7 +315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin Categories
-  app.post("/api/admin/categories", isAuthenticated, isAdmin, async (req, res) => {
+  app.post("/api/admin/categories", isAdmin, async (req, res) => {
     try {
       const validatedCategory = insertCategorySchema.parse(req.body);
       const category = await storage.createCategory(validatedCategory);
@@ -246,7 +326,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/categories/:id", isAuthenticated, isAdmin, async (req, res) => {
+  app.put("/api/admin/categories/:id", isAdmin, async (req, res) => {
     try {
       const category = await storage.updateCategory(req.params.id, req.body);
       if (!category) {
@@ -259,7 +339,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/categories/:id", isAuthenticated, isAdmin, async (req, res) => {
+  app.delete("/api/admin/categories/:id", isAdmin, async (req, res) => {
     try {
       const success = await storage.deleteCategory(req.params.id);
       if (!success) {
@@ -273,7 +353,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin Orders
-  app.get("/api/admin/orders", isAuthenticated, isAdmin, async (req, res) => {
+  app.get("/api/admin/orders", isAdmin, async (req, res) => {
     try {
       const orders = await storage.getAllOrders();
 
@@ -293,7 +373,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/orders/:id/status", isAuthenticated, isAdmin, async (req, res) => {
+  app.put("/api/admin/orders/:id/status", isAdmin, async (req, res) => {
     try {
       const { status } = req.body;
       if (!status) {
@@ -311,7 +391,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin Users
-  app.get("/api/admin/users", isAuthenticated, isAdmin, async (req, res) => {
+  app.get("/api/admin/users", isAdmin, async (req, res) => {
     try {
       const users = await storage.getAllUsers();
       res.json(users);
@@ -322,7 +402,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin Analytics
-  app.get("/api/admin/analytics", isAuthenticated, isAdmin, async (req, res) => {
+  app.get("/api/admin/analytics", isAdmin, async (req, res) => {
     try {
       const [orders, products, users, categories] = await Promise.all([
         storage.getAllOrders(),
