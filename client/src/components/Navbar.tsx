@@ -3,6 +3,7 @@ import { ShoppingCart, Menu, X, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import ThemeToggle from "@/components/ThemeToggle";
 
 interface NavbarProps {
   cartItemCount?: number;
@@ -46,8 +47,9 @@ export default function Navbar({ cartItemCount = 0 }: NavbarProps) {
             ))}
           </div>
 
-          {/* Cart Icon */}
+          {/* Cart Icon & Theme Toggle */}
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <Link href="/cart" data-testid="link-cart">
               <Button size="icon" variant="ghost" className="relative">
                 <ShoppingCart className="w-5 h-5" />
