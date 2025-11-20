@@ -1,7 +1,17 @@
 import express, { type Request, Response, NextFunction } from "express";
+import cors from "cors";
 import { log } from "./vite";
 
 const app = express();
+
+// CORS Configuration for Android/Mobile App
+app.use(cors({
+  origin: true, // Allow all origins (required for mobile apps)
+  credentials: true, // Allow cookies for authentication
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Requested-With'],
+  exposedHeaders: ['Set-Cookie']
+}));
 
 declare module 'http' {
   interface IncomingMessage {

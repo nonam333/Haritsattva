@@ -8,7 +8,9 @@ const adapter = new DrizzlePostgreSQLAdapter(db, session, users);
 export const lucia = new Lucia(adapter, {
 	sessionCookie: {
 		attributes: {
-			secure: process.env.NODE_ENV === "production"
+			secure: process.env.NODE_ENV === "production",
+			sameSite: "none", // Required for cross-origin requests (Android app)
+			domain: process.env.NODE_ENV === "production" ? ".onrender.com" : undefined
 		}
 	},
   getUserAttributes: (attributes) => {

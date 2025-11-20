@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: haritsattva-api
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: node --max-old-space-size=450 --expose-gc dist/server/index.js || npx tsx --max-old-space-size=450 --expose-gc server/index.ts
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: RUN_SEED
+        value: false
+    healthCheckPath: /api/auth/user
+    autoDeploy: true

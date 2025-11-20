@@ -3,6 +3,16 @@ import { app } from "./app";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
+// Memory optimization for Render free tier
+if (process.env.NODE_ENV === "production") {
+  // Limit memory usage
+  if (global.gc) {
+    setInterval(() => {
+      global.gc();
+    }, 30000); // Run garbage collection every 30 seconds
+  }
+}
+
 (async () => {
   const server = await registerRoutes(app);
 

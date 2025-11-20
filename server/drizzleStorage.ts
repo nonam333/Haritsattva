@@ -34,11 +34,24 @@ export class DrizzleStorage implements IStorage {
     if (!databaseUrl) {
       throw new Error("DATABASE_URL is not set");
     }
-    const sql = neon(databaseUrl);
+
+    // Optimize connection for low memory environments (Render free tier)
+    const sql = neon(databaseUrl, {
+      fetchOptions: {
+        cache: 'no-store' // Prevent memory buildup from caching
+      }
+    });
+
     this.db = drizzle(sql, { schema });
     this.db_for_seeding = this.db;
 
-    seedDefaultData(this.db_for_seeding);
+    // Only seed on first deployment or when explicitly needed
+    // Check environment variable to control seeding
+    if (process.env.RUN_SEED === 'true') {
+      seedDefaultData(this.db_for_seeding).catch(err => {
+        console.error('Seeding error:', err);
+      });
+    }
   }
 
   // User methods

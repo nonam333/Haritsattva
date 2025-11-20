@@ -1,0 +1,63 @@
+═══════════════════════════════════════════════════════════════
+  RENDER.COM ENVIRONMENT VARIABLES - COPY & PASTE
+═══════════════════════════════════════════════════════════════
+
+Go to: Render Dashboard → Your Service → Environment
+
+Add these variables (WITHOUT quotes):
+
+─────────────────────────────────────────────────────────────
+
+Key: NODE_ENV
+Value: production
+
+─────────────────────────────────────────────────────────────
+
+Key: PORT
+Value: 10000
+
+─────────────────────────────────────────────────────────────
+
+Key: DATABASE_URL
+Value: postgresql://neondb_owner:npg_utl2JYVya7qQ@ep-long-cell-a1lvcbq1-pooler.ap-southeast-1.aws.neon.tech/Haritattva?sslmode=require&channel_binding=require
+
+─────────────────────────────────────────────────────────────
+
+Key: SESSION_SECRET
+Value: 055dc131a5b2b08ef00bd86f516839bc13dce6d20dc62b7f1059f1d6bfa7584b
+
+─────────────────────────────────────────────────────────────
+
+Key: CLOUDINARY_CLOUD_NAME
+Value: Root
+
+─────────────────────────────────────────────────────────────
+
+Key: CLOUDINARY_API_KEY
+Value: 762295254871992
+
+─────────────────────────────────────────────────────────────
+
+Key: CLOUDINARY_API_SECRET
+Value: 3kB_Noh_Jg4FP2gG01Se1iVM_6Y
+
+─────────────────────────────────────────────────────────────
+
+Key: RUN_SEED
+Value: false
+
+⚠️  CRITICAL: Set RUN_SEED=false to prevent memory crashes!
+
+═══════════════════════════════════════════════════════════════
+
+BUILD COMMAND (Render Dashboard → Settings → Build Command):
+npm install && npm run build
+
+START COMMAND (Render Dashboard → Settings → Start Command):
+npx tsx --max-old-space-size=450 --expose-gc server/index.ts
+
+═══════════════════════════════════════════════════════════════
+
+After adding these, click "Save Changes" and Render will redeploy.
+
+═══════════════════════════════════════════════════════════════
