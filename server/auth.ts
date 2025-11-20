@@ -10,7 +10,8 @@ export const lucia = new Lucia(adapter, {
 		attributes: {
 			secure: process.env.NODE_ENV === "production",
 			sameSite: "none", // Required for cross-origin requests (Android app)
-			domain: process.env.NODE_ENV === "production" ? ".onrender.com" : undefined
+			httpOnly: true // Prevent JavaScript access to cookie
+			// Don't set domain - let it default to the current host
 		}
 	},
   getUserAttributes: (attributes) => {
