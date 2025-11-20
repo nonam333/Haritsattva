@@ -71,14 +71,14 @@ export default function Navbar({}: NavbarProps) {
           </div>
 
           {/* Cart Icon, User & Theme Toggle */}
-          <div className="flex items-center gap-1 md:gap-2">
-            <div className="hidden sm:block">
+          <div className="flex items-center gap-0.5 sm:gap-1 md:gap-2">
+            <div className="hidden lg:block">
               <ThemeToggle />
             </div>
             {isAuthenticated ? (
               <>
                 {isAdmin && (
-                  <Link href="/admin" data-testid="link-admin">
+                  <Link href="/admin" data-testid="link-admin" className="hidden sm:block">
                     <Button size="icon" variant="ghost" title="Admin Panel">
                       <Shield className="w-5 h-5" />
                     </Button>
@@ -98,7 +98,7 @@ export default function Navbar({}: NavbarProps) {
                     )}
                   </Button>
                 </Link>
-                <div className="hidden md:flex items-center gap-3 ml-2">
+                <div className="hidden md:flex items-center gap-1 md:gap-2">
                   <Avatar
                     className="w-8 h-8 cursor-pointer hover:ring-2 hover:ring-primary transition-all"
                     onClick={() => setProfileModalOpen(true)}
@@ -121,12 +121,12 @@ export default function Navbar({}: NavbarProps) {
                 </div>
               </>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <Link href="/login">
-                  <Button variant="ghost">Login</Button>
+                  <Button variant="ghost" size="sm" className="text-xs sm:text-sm">Login</Button>
                 </Link>
                 <Link href="/signup">
-                  <Button>Sign Up</Button>
+                  <Button size="sm" className="text-xs sm:text-sm">Sign Up</Button>
                 </Link>
               </div>
             )}

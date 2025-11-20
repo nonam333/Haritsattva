@@ -1,18 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-
-async function fetchUser() {
-  const response = await fetch("/api/auth/user");
-  if (!response.ok) {
-    throw new Error("Network response was not ok");
-  }
-  const data = await response.json();
-  return data.user;
-}
+import { getQueryFn } from "@/lib/queryClient";
 
 export function useAuth() {
   const { data: user, isLoading } = useQuery({
-    queryKey: ["user"],
-    queryFn: fetchUser,
+    queryKey: ["/api/auth/user"],
+    queryFn: getQueryFn({ on401: "returnNull" }),
     retry: false,
   });
 
