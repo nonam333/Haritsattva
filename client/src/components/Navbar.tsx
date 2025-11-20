@@ -14,6 +14,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { apiRequest } from "@/lib/queryClient";
 
 interface NavbarProps {}
 
@@ -70,8 +71,10 @@ export default function Navbar({}: NavbarProps) {
           </div>
 
           {/* Cart Icon, User & Theme Toggle */}
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
+          <div className="flex items-center gap-1 md:gap-2">
+            <div className="hidden sm:block">
+              <ThemeToggle />
+            </div>
             {isAuthenticated ? (
               <>
                 {isAdmin && (
@@ -108,7 +111,7 @@ export default function Navbar({}: NavbarProps) {
                     size="icon"
                     variant="ghost"
                     onClick={async () => {
-                      await fetch('/api/auth/logout', { method: 'POST' });
+                      await apiRequest('POST', '/api/auth/logout');
                       window.location.href = '/login';
                     }}
                     data-testid="button-logout"
@@ -172,7 +175,8 @@ export default function Navbar({}: NavbarProps) {
                   variant="ghost"
                   className="w-full justify-start text-destructive hover:text-destructive"
                   onClick={async () => {
-                    await fetch('/api/auth/logout', { method: 'POST' });
+                    setMobileMenuOpen(false);
+                    await apiRequest('POST', '/api/auth/logout');
                     window.location.href = '/login';
                   }}
                 >
@@ -253,7 +257,7 @@ export default function Navbar({}: NavbarProps) {
               variant="destructive"
               onClick={async () => {
                 setProfileModalOpen(false);
-                await fetch('/api/auth/logout', { method: 'POST' });
+                await apiRequest('POST', '/api/auth/logout');
                 window.location.href = '/login';
               }}
             >

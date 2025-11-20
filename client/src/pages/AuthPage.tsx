@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLocation } from "wouter";
-import { useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
+import { useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient'; // Import apiRequest for absolute URLs
 
 export default function AuthPage() {
   const [location, setLocation] = useLocation();
@@ -11,7 +12,7 @@ export default function AuthPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const queryClient = useQueryClient(); // Get queryClient instance
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     setIsLogin(location === '/login');
@@ -24,11 +25,7 @@ export default function AuthPage() {
     const endpoint = isLogin ? '/api/auth/login' : '/api/auth/signup';
 
     try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await apiRequest('POST', endpoint, { email, password });
 
       if (!response.ok) {
         const data = await response.json();
