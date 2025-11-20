@@ -23,7 +23,8 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, CheckCircle2, Building2 } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth"; // Import useAuth
+import { useAuth } from "@/hooks/useAuth";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function CheckoutPage() {
   const [, navigate] = useLocation();
@@ -63,12 +64,7 @@ export default function CheckoutPage() {
 
   const createOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
-      const response = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(orderData),
-        credentials: "include",
-      });
+      const response = await apiRequest("POST", "/api/orders", orderData);
       if (!response.ok) throw new Error("Failed to create order");
       return response.json();
     },
@@ -77,18 +73,15 @@ export default function CheckoutPage() {
       clearCart();
       toast({ title: "Order placed successfully!" });
     },
-    onError: () => {
-      toast({ title: "Failed to place order", variant: "destructive" });
+    onError: (error: any) => {
+      console.error("Order placement error:", error);
+      toast({ title: "Failed to place order", variant: "destructive", description: error.message });
     },
   });
 
   const societyRequestMutation = useMutation({
     mutationFn: async (data: typeof societyRequestForm) => {
-      const response = await fetch("/api/society-requests", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+      const response = await apiRequest("POST", "/api/society-requests", data);
       if (!response.ok) throw new Error("Failed to submit request");
       return response.json();
     },

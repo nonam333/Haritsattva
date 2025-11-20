@@ -14,7 +14,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 interface NavbarProps {}
 
@@ -35,14 +35,14 @@ export default function Navbar({}: NavbarProps) {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
+    <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" data-testid="link-home">
-            <div className="flex items-center gap-2 hover-elevate active-elevate-2 px-3 py-2 rounded-md cursor-pointer">
-              <img src="/logo.png" alt="Haritsattva" className="w-16 h-16 object-contain" />
-              <span className="text-xl font-semibold text-foreground">Haritsattva</span>
+            <div className="flex items-center gap-2 hover-elevate active-elevate-2 px-2 py-1 rounded-md cursor-pointer">
+              <img src="/logo.png" alt="Haritsattva" className="w-10 h-10 object-contain" />
+              <span className="text-lg font-semibold text-foreground hidden sm:inline">Haritsattva</span>
             </div>
           </Link>
 
@@ -112,6 +112,7 @@ export default function Navbar({}: NavbarProps) {
                     variant="ghost"
                     onClick={async () => {
                       await apiRequest('POST', '/api/auth/logout');
+                      queryClient.clear(); // Clear all cached data
                       window.location.href = '/login';
                     }}
                     data-testid="button-logout"
@@ -170,6 +171,12 @@ export default function Navbar({}: NavbarProps) {
                   </Button>
                 </Link>
               )}
+              {/* Dark Mode Toggle in Mobile Menu */}
+              <div className="flex items-center justify-between px-3 py-2">
+                <span className="text-sm font-medium">Dark Mode</span>
+                <ThemeToggle />
+              </div>
+
               {isAuthenticated ? (
                 <Button
                   variant="ghost"
@@ -177,6 +184,7 @@ export default function Navbar({}: NavbarProps) {
                   onClick={async () => {
                     setMobileMenuOpen(false);
                     await apiRequest('POST', '/api/auth/logout');
+                    queryClient.clear(); // Clear all cached data
                     window.location.href = '/login';
                   }}
                 >
@@ -258,6 +266,7 @@ export default function Navbar({}: NavbarProps) {
               onClick={async () => {
                 setProfileModalOpen(false);
                 await apiRequest('POST', '/api/auth/logout');
+                queryClient.clear(); // Clear all cached data
                 window.location.href = '/login';
               }}
             >
