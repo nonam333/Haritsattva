@@ -36,34 +36,34 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-16">
-      <div className="mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4" data-testid="text-page-title">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 lg:py-16">
+      <div className="mb-8 sm:mb-12">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3 sm:mb-4" data-testid="text-page-title">
           Our Products
         </h1>
-        <p className="text-muted-foreground text-lg">
+        <p className="text-muted-foreground text-base sm:text-lg">
           Browse our selection of fresh, organic produce
         </p>
       </div>
 
-      {/* Category Filter */}
-      <div className="flex gap-3 mb-12 flex-wrap">
+      {/* Category Filter - Optimized for mobile */}
+      <div className="flex gap-2 sm:gap-3 mb-8 sm:mb-12 flex-wrap">
         {categoryOptions.map((category) => (
           <Button
             key={category.id}
             variant={selectedCategory === category.id ? "default" : "outline"}
-            size="lg"
+            size="default"
             onClick={() => setSelectedCategory(category.id)}
             data-testid={`button-category-${category.id}`}
-            className="shadow-sm hover:shadow-md transition-all"
+            className="shadow-sm hover:shadow-md transition-all text-sm sm:text-base px-3 sm:px-4 py-2 sm:py-2.5"
           >
             {category.label}
           </Button>
         ))}
       </div>
 
-      {/* Products Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+      {/* Products Grid - Responsive: 1 col mobile, 2 cols tablet, 3 cols desktop, 4 cols large */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 mb-12 sm:mb-16">
         {filteredProducts.length > 0 ? (
           filteredProducts.map((product) => (
             <ProductCard

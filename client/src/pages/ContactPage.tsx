@@ -27,10 +27,7 @@ export default function ContactPage() {
 
   const contactMutation = useMutation({
     mutationFn: async (data: ContactFormData) => {
-      return await apiRequest("/api/contact", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      return await apiRequest("POST", "/api/contact", data);
     },
     onSuccess: () => {
       toast({
@@ -160,7 +157,7 @@ export default function ContactPage() {
                   <h3 className="font-semibold text-foreground mb-1">Email</h3>
                   <p className="text-muted-foreground">support@haritsattva.com</p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    We'll respond within 24 hours
+                    We'll respond within 1 hour
                   </p>
                 </div>
               </div>
@@ -175,7 +172,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-foreground mb-1">Phone</h3>
-                  <p className="text-muted-foreground">(555) 123-4567</p>
+                  <p className="text-muted-foreground">+91 9953035329</p>
                   <p className="text-sm text-muted-foreground mt-1">
                     Available during business hours
                   </p>
@@ -208,8 +205,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-foreground mb-1">Location</h3>
-                  <p className="text-muted-foreground">123 Organic Street</p>
-                  <p className="text-muted-foreground">Fresh Valley, CA 94000</p>
+                  <p className="text-muted-foreground">Supertech Ecovillage 2</p>
                 </div>
               </div>
             </CardContent>

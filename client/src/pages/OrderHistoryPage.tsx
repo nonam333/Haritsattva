@@ -14,7 +14,7 @@ const statusColors: Record<string, string> = {
 };
 
 export default function OrderHistoryPage() {
-  const { data: orders, isLoading } = useQuery<any[]>({
+  const { data: ordersData, isLoading } = useQuery<any[]>({
     queryKey: ["/api/orders/my-orders"],
     queryFn: async () => {
       const response = await fetch("/api/orders/my-orders", {
@@ -23,6 +23,13 @@ export default function OrderHistoryPage() {
       if (!response.ok) throw new Error("Failed to fetch orders");
       return response.json();
     },
+  });
+
+  // Sort orders by latest first
+  const orders = ordersData?.sort((a, b) => {
+    const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return dateB - dateA; // Descending order (latest first)
   });
 
   if (isLoading) {
