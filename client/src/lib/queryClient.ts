@@ -5,7 +5,7 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 // CHANGE THIS to your specific Render URL.
 // Do not leave a trailing slash (e.g., use "https://myapp.onrender.com")
 // -----------------------------------------------------------------
-const BASE_URL = "https://haritsattva.onrender.com"; 
+const BASE_URL = "https://haritsattvava-api.onrender.com"; 
 
 // Helper: Combines the Base URL with the API path
 function getFullUrl(path: string) {
