@@ -28,19 +28,28 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  
+
   // FIX 1: Use full URL
   const finalUrl = getFullUrl(url);
 
-  const res = await fetch(finalUrl, {
-    method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
-  });
+  console.log(`[API Request] ${method} ${finalUrl}`, data);
 
-  await throwIfResNotOk(res);
-  return res;
+  try {
+    const res = await fetch(finalUrl, {
+      method,
+      headers: data ? { "Content-Type": "application/json" } : {},
+      body: data ? JSON.stringify(data) : undefined,
+      credentials: "include",
+    });
+
+    console.log(`[API Response] ${method} ${finalUrl} - Status: ${res.status}`);
+
+    await throwIfResNotOk(res);
+    return res;
+  } catch (error) {
+    console.error(`[API Error] ${method} ${finalUrl}`, error);
+    throw error;
+  }
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";

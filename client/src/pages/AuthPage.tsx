@@ -24,27 +24,39 @@ export default function AuthPage() {
 
     const endpoint = isLogin ? '/api/auth/login' : '/api/auth/signup';
 
+    console.log('[AuthPage] Starting authentication:', { endpoint, email });
+
     try {
       const response = await apiRequest('POST', endpoint, { email, password });
 
+      console.log('[AuthPage] Auth response received:', response.status);
+
       if (!response.ok) {
         const data = await response.json();
+        console.error('[AuthPage] Auth failed:', data);
         throw new Error(data.error || 'Something went wrong');
       }
+
+      console.log('[AuthPage] Auth successful, clearing cache...');
 
       // Clear all cache and force immediate refetch
       queryClient.clear();
 
       // Wait a moment for cookies to be set
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      console.log('[AuthPage] Refetching user data...');
 
       // Force refetch auth state
       await queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
 
+      console.log('[AuthPage] Redirecting to home...');
+
       // Handle successful login/signup, redirect to home
       setLocation("/");
     } catch (err: any) {
-      setError(err.message);
+      console.error('[AuthPage] Authentication error:', err);
+      setError(err.message || 'Network error - please check your connection');
     }
   };
 
