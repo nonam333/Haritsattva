@@ -8,9 +8,10 @@ const adapter = new DrizzlePostgreSQLAdapter(db, session, users);
 export const lucia = new Lucia(adapter, {
 	sessionCookie: {
 		attributes: {
+			// For Android WebView compatibility, use lax instead of none
 			secure: process.env.NODE_ENV === "production",
-			sameSite: "none", // Required for cross-origin requests (Android app)
-			httpOnly: true // Prevent JavaScript access to cookie
+			sameSite: "lax", // Changed from "none" for Android WebView compatibility
+			httpOnly: false // Allow JavaScript access for mobile debugging
 			// Don't set domain - let it default to the current host
 		}
 	},

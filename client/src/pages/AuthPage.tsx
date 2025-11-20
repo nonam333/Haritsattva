@@ -32,9 +32,14 @@ export default function AuthPage() {
         throw new Error(data.error || 'Something went wrong');
       }
 
-      // Invalidate relevant queries to force re-fetch and update UI
-      await queryClient.invalidateQueries({ queryKey: ["user"] });
-      await queryClient.invalidateQueries({ queryKey: ["/api/admin/check"] });
+      // Clear all cache and force immediate refetch
+      queryClient.clear();
+
+      // Wait a moment for cookies to be set
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Force refetch auth state
+      await queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
 
       // Handle successful login/signup, redirect to home
       setLocation("/");

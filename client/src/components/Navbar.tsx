@@ -42,7 +42,7 @@ export default function Navbar({}: NavbarProps) {
           <Link href="/" data-testid="link-home">
             <div className="flex items-center gap-2 hover-elevate active-elevate-2 px-2 py-1 rounded-md cursor-pointer">
               <img src="/logo.png" alt="Haritsattva" className="w-10 h-10 object-contain" />
-              <span className="text-lg font-semibold text-foreground hidden sm:inline">Haritsattva</span>
+              <span className="text-lg font-semibold text-foreground">Haritsattva</span>
             </div>
           </Link>
 
