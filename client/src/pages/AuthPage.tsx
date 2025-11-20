@@ -37,18 +37,30 @@ export default function AuthPage() {
         throw new Error(data.error || 'Something went wrong');
       }
 
-      console.log('[AuthPage] Auth successful, clearing cache...');
+      // Get the session token from response
+      const data = await response.json();
+      console.log('[AuthPage] Auth successful, received token:', data.sessionToken);
+
+      // CRITICAL: Store session token in localStorage for mobile auth
+      if (data.sessionToken) {
+        localStorage.setItem('sessionToken', data.sessionToken);
+        console.log('[AuthPage] Token stored in localStorage');
+      }
+
+      console.log('[AuthPage] Clearing cache...');
 
       // Clear all cache and force immediate refetch
       queryClient.clear();
 
-      // Wait a moment for cookies to be set
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Wait longer for cookies to be set in WebView
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
       console.log('[AuthPage] Refetching user data...');
 
       // Force refetch auth state
-      await queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
+      const result = await queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
+
+      console.log('[AuthPage] Refetch result:', result);
 
       console.log('[AuthPage] Redirecting to home...');
 

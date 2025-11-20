@@ -47,7 +47,8 @@ export function registerApiRoutes(app: Express) {
       const session = await lucia.createSession(userId, {});
       const sessionCookie = lucia.createSessionCookie(session.id);
       res.appendHeader("Set-Cookie", sessionCookie.serialize());
-      return res.status(201).json({ success: true });
+      // ALSO return session token for mobile apps
+      return res.status(201).json({ success: true, sessionToken: session.id });
     } catch (e) {
       // db error, email taken
       return res.status(400).json({ error: "Email already in use" });
@@ -77,7 +78,8 @@ export function registerApiRoutes(app: Express) {
 		const session = await lucia.createSession(existingUser.id, {});
 		const sessionCookie = lucia.createSessionCookie(session.id);
 		res.appendHeader("Set-Cookie", sessionCookie.serialize());
-		return res.status(200).json({ success: true });
+		// ALSO return session token for mobile apps (Android WebView doesn't reliably support cookies)
+		return res.status(200).json({ success: true, sessionToken: session.id });
 	});
 
   app.post("/api/auth/logout", async (req, res) => {
@@ -87,10 +89,20 @@ export function registerApiRoutes(app: Express) {
 	});
 
   app.get("/api/auth/user", async (req, res) => {
-    const sessionId = lucia.readSessionCookie(req.headers.cookie ?? "");
+    // Check Authorization header FIRST (for mobile apps)
+    let sessionId = null;
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      sessionId = authHeader.substring(7); // Remove 'Bearer ' prefix
+    } else {
+      // Fallback to cookie (for web browsers)
+      sessionId = lucia.readSessionCookie(req.headers.cookie ?? "");
+    }
+
     if (!sessionId) {
       return res.status(401).json({ user: null });
     }
+
     const { session, user } = await lucia.validateSession(sessionId);
     if (session && session.fresh) {
       const sessionCookie = lucia.createSessionCookie(session.id);
@@ -99,6 +111,7 @@ export function registerApiRoutes(app: Express) {
     if (!session) {
       const sessionCookie = lucia.createBlankSessionCookie();
       res.appendHeader("Set-Cookie", sessionCookie.serialize());
+      return res.status(401).json({ user: null });
     }
     return res.status(200).json({ user });
   });
@@ -117,7 +130,16 @@ export function registerApiRoutes(app: Express) {
   });
 
   app.use(async (req, res, next) => {
-    const sessionId = lucia.readSessionCookie(req.headers.cookie ?? "");
+    // Check Authorization header FIRST (for mobile apps)
+    let sessionId = null;
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      sessionId = authHeader.substring(7);
+    } else {
+      // Fallback to cookie (for web browsers)
+      sessionId = lucia.readSessionCookie(req.headers.cookie ?? "");
+    }
+
     if (!sessionId) {
       res.locals.user = null;
       res.locals.session = null;

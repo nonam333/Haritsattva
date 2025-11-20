@@ -34,12 +34,22 @@ export async function apiRequest(
 
   console.log(`[API Request] ${method} ${finalUrl}`, data);
 
+  // Get session token from localStorage (for mobile auth)
+  const sessionToken = localStorage.getItem('sessionToken');
+  const headers: Record<string, string> = data ? { "Content-Type": "application/json" } : {};
+
+  // Add Authorization header if we have a token
+  if (sessionToken) {
+    headers['Authorization'] = `Bearer ${sessionToken}`;
+    console.log(`[API Request] Using token auth`);
+  }
+
   try {
     const res = await fetch(finalUrl, {
       method,
-      headers: data ? { "Content-Type": "application/json" } : {},
+      headers,
       body: data ? JSON.stringify(data) : undefined,
-      credentials: "include",
+      credentials: "include", // Keep for backwards compatibility
     });
 
     console.log(`[API Response] ${method} ${finalUrl} - Status: ${res.status}`);
@@ -58,13 +68,23 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    
+
     // FIX 2: specific fix for React Query fetches
     const path = queryKey.join("/");
     const finalUrl = getFullUrl(path);
 
+    // Get session token from localStorage (for mobile auth)
+    const sessionToken = localStorage.getItem('sessionToken');
+    const headers: Record<string, string> = {};
+
+    // Add Authorization header if we have a token
+    if (sessionToken) {
+      headers['Authorization'] = `Bearer ${sessionToken}`;
+    }
+
     const res = await fetch(finalUrl, {
-      credentials: "include",
+      credentials: "include", // Keep for backwards compatibility
+      headers,
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {

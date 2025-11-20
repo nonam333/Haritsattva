@@ -112,6 +112,7 @@ export default function Navbar({}: NavbarProps) {
                     variant="ghost"
                     onClick={async () => {
                       await apiRequest('POST', '/api/auth/logout');
+                      localStorage.removeItem('sessionToken'); // Clear token
                       queryClient.clear(); // Clear all cached data
                       window.location.href = '/login';
                     }}
@@ -184,6 +185,7 @@ export default function Navbar({}: NavbarProps) {
                   onClick={async () => {
                     setMobileMenuOpen(false);
                     await apiRequest('POST', '/api/auth/logout');
+                    localStorage.removeItem('sessionToken'); // Clear token
                     queryClient.clear(); // Clear all cached data
                     window.location.href = '/login';
                   }}
@@ -266,6 +268,7 @@ export default function Navbar({}: NavbarProps) {
               onClick={async () => {
                 setProfileModalOpen(false);
                 await apiRequest('POST', '/api/auth/logout');
+                localStorage.removeItem('sessionToken'); // Clear token
                 queryClient.clear(); // Clear all cached data
                 window.location.href = '/login';
               }}
