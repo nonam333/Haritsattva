@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Haritsattva</string>
+    <string name="title_activity_main">Haritsattva</string>
+    <string name="package_name">com.harsh.haritsattva</string>
+    <string name="custom_url_scheme">com.harsh.haritsattva</string>
+</resources>

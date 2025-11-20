@@ -7,6 +7,8 @@ import {
   insertCategorySchema,
   insertOrderSchema,
   insertOrderItemSchema,
+  insertProductSuggestionSchema,
+  insertSocietyRequestSchema,
   users
 } from "@shared/schema";
 import { isAdmin } from "./adminAuth";
@@ -144,6 +146,29 @@ export function registerApiRoutes(app: Express) {
     } catch (error) {
       console.error("Get submissions error:", error);
       res.status(500).json({ error: "Failed to fetch submissions" });
+    }
+  });
+
+  // ============== PRODUCT SUGGESTION ROUTES ==============
+  // Public route: submit product suggestion
+  app.post("/api/product-suggestions", async (req, res) => {
+    try {
+      const validatedData = insertProductSuggestionSchema.parse(req.body);
+
+      // Sanitize inputs
+      const sanitizedData = {
+        ...validatedData,
+        suggestedProductName: validatedData.suggestedProductName.trim(),
+        productDescription: validatedData.productDescription?.trim(),
+        suggestedCategory: validatedData.suggestedCategory?.trim(),
+        userEmail: validatedData.userEmail?.trim(),
+      };
+
+      const suggestion = await storage.createProductSuggestion(sanitizedData);
+      res.status(201).json({ message: "Suggestion submitted successfully!", suggestion });
+    } catch (error) {
+      console.error("Create suggestion error:", error);
+      res.status(400).json({ error: "Failed to submit suggestion" });
     }
   });
 
@@ -474,6 +499,123 @@ export function registerApiRoutes(app: Express) {
     } catch (error) {
       console.error("Error fetching analytics:", error);
       res.status(500).json({ error: "Failed to fetch analytics" });
+    }
+  });
+
+  // ============== ADMIN PRODUCT SUGGESTION ROUTES ==============
+  // Get all product suggestions
+  app.get("/api/admin/product-suggestions", isAdmin, async (req, res) => {
+    try {
+      const suggestions = await storage.getAllProductSuggestions();
+      res.json(suggestions);
+    } catch (error) {
+      console.error("Error fetching product suggestions:", error);
+      res.status(500).json({ error: "Failed to fetch product suggestions" });
+    }
+  });
+
+  // Get single product suggestion
+  app.get("/api/admin/product-suggestions/:id", isAdmin, async (req, res) => {
+    try {
+      const suggestion = await storage.getProductSuggestion(req.params.id);
+      if (!suggestion) {
+        return res.status(404).json({ error: "Product suggestion not found" });
+      }
+      res.json(suggestion);
+    } catch (error) {
+      console.error("Error fetching product suggestion:", error);
+      res.status(500).json({ error: "Failed to fetch product suggestion" });
+    }
+  });
+
+  // Update product suggestion status
+  app.put("/api/admin/product-suggestions/:id/status", isAdmin, async (req, res) => {
+    try {
+      const { status } = req.body;
+      if (!status || !['pending', 'reviewed', 'implemented', 'rejected'].includes(status)) {
+        return res.status(400).json({ error: "Invalid status" });
+      }
+      const suggestion = await storage.updateProductSuggestion(req.params.id, { status });
+      if (!suggestion) {
+        return res.status(404).json({ error: "Product suggestion not found" });
+      }
+      res.json(suggestion);
+    } catch (error) {
+      console.error("Update suggestion status error:", error);
+      res.status(500).json({ error: "Failed to update suggestion status" });
+    }
+  });
+
+  // Update product suggestion notes
+  app.put("/api/admin/product-suggestions/:id/notes", isAdmin, async (req, res) => {
+    try {
+      const { adminNotes } = req.body;
+      const suggestion = await storage.updateProductSuggestion(req.params.id, { adminNotes });
+      if (!suggestion) {
+        return res.status(404).json({ error: "Product suggestion not found" });
+      }
+      res.json(suggestion);
+    } catch (error) {
+      console.error("Update suggestion notes error:", error);
+      res.status(500).json({ error: "Failed to update suggestion notes" });
+    }
+  });
+
+  // Delete product suggestion
+  app.delete("/api/admin/product-suggestions/:id", isAdmin, async (req, res) => {
+    try {
+      const deleted = await storage.deleteProductSuggestion(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Product suggestion not found" });
+      }
+      res.json({ message: "Product suggestion deleted successfully" });
+    } catch (error) {
+      console.error("Delete suggestion error:", error);
+      res.status(500).json({ error: "Failed to delete suggestion" });
+    }
+  });
+
+  // ============== SOCIETY REQUEST ROUTES ==============
+  // Public route: submit society request
+  app.post("/api/society-requests", async (req, res) => {
+    try {
+      const validatedData = insertSocietyRequestSchema.parse(req.body);
+      const sanitizedData = {
+        name: validatedData.name.trim(),
+        societyName: validatedData.societyName.trim(),
+        phone: validatedData.phone.trim(),
+      };
+      const request = await storage.createSocietyRequest(sanitizedData);
+      res.status(201).json({ message: "Request submitted successfully!", request });
+    } catch (error) {
+      console.error("Create society request error:", error);
+      res.status(400).json({ error: "Failed to submit request" });
+    }
+  });
+
+  // ============== ADMIN SOCIETY REQUEST ROUTES ==============
+  // Get all society requests
+  app.get("/api/admin/society-requests", isAdmin, async (req, res) => {
+    try {
+      const requests = await storage.getAllSocietyRequests();
+      res.json(requests);
+    } catch (error) {
+      console.error("Get society requests error:", error);
+      res.status(500).json({ error: "Failed to fetch society requests" });
+    }
+  });
+
+  // Delete society request
+  app.delete("/api/admin/society-requests/:id", isAdmin, async (req, res) => {
+    try {
+      const deleted = await storage.deleteSocietyRequest(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Society request not found" });
+      }
+      res.json({ message: "Society request deleted successfully" });
+    } catch (error) {
+      console.error("Delete society request error:", error);
+      res.status(500).json({ error: "Failed to delete request" });
     }
   });
 }

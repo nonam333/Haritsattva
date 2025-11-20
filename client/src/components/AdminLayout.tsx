@@ -8,6 +8,8 @@ import {
   Users,
   Menu,
   X,
+  Lightbulb,
+  Building2,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -22,6 +24,8 @@ const navItems = [
   { path: "/admin/products", label: "Products", icon: Package },
   { path: "/admin/orders", label: "Orders", icon: ShoppingCart },
   { path: "/admin/categories", label: "Categories", icon: FolderTree },
+  { path: "/admin/suggestions", label: "Product Suggestions", icon: Lightbulb },
+  { path: "/admin/society-requests", label: "New Society Requests", icon: Building2 },
   { path: "/admin/contacts", label: "Contact Submissions", icon: MessageSquare },
   { path: "/admin/users", label: "Users", icon: Users },
 ];

@@ -6,13 +6,20 @@ export default function AboutPage() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary/10 to-accent py-24">
-        <div className="max-w-4xl mx-auto px-6 text-center">
+      <section className="relative bg-gradient-to-br from-primary/10 to-accent py-24 overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <img
+            src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=1200&q=80"
+            alt="Fresh organic vegetables"
+            className="w-full h-full object-cover"
+          />
+        </div>
+        <div className="relative max-w-4xl mx-auto px-6 text-center">
           <div className="mb-6 flex justify-center">
             <img
               src="/logo.png"
               alt="Haritsattva"
-              className="w-24 h-24 object-contain"
+              className="w-24 h-24 object-contain drop-shadow-lg"
             />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6" data-testid="text-page-title">

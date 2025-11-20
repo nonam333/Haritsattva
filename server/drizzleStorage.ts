@@ -16,6 +16,10 @@ import {
   InsertOrder,
   OrderItem,
   InsertOrderItem,
+  ProductSuggestion,
+  InsertProductSuggestion,
+  SocietyRequest,
+  InsertSocietyRequest,
 } from "./storage"; // Assuming IStorage and types are exported from storage.ts
 import { randomUUID } from "crypto";
 
@@ -172,6 +176,50 @@ export class DrizzleStorage implements IStorage {
   async createOrderItem(insertItem: InsertOrderItem): Promise<OrderItem> {
     const [orderItem] = await this.db.insert(schema.orderItems).values(insertItem).returning();
     return orderItem;
+  }
+
+  // Product Suggestions
+  async getAllProductSuggestions(): Promise<ProductSuggestion[]> {
+    return this.db.select().from(schema.productSuggestions);
+  }
+
+  async getProductSuggestion(id: string): Promise<ProductSuggestion | undefined> {
+    const suggestions = await this.db.select().from(schema.productSuggestions).where(eq(schema.productSuggestions.id, id)).limit(1);
+    return suggestions[0];
+  }
+
+  async createProductSuggestion(insertSuggestion: InsertProductSuggestion): Promise<ProductSuggestion> {
+    const [suggestion] = await this.db.insert(schema.productSuggestions).values(insertSuggestion).returning();
+    return suggestion;
+  }
+
+  async updateProductSuggestion(id: string, updateData: Partial<InsertProductSuggestion>): Promise<ProductSuggestion | undefined> {
+    const [suggestion] = await this.db
+      .update(schema.productSuggestions)
+      .set({ ...updateData, updatedAt: new Date() })
+      .where(eq(schema.productSuggestions.id, id))
+      .returning();
+    return suggestion;
+  }
+
+  async deleteProductSuggestion(id: string): Promise<boolean> {
+    const result = await this.db.delete(schema.productSuggestions).where(eq(schema.productSuggestions.id, id)).returning({ id: schema.productSuggestions.id });
+    return result.length > 0;
+  }
+
+  // Society Requests
+  async getAllSocietyRequests(): Promise<SocietyRequest[]> {
+    return this.db.select().from(schema.societyRequests);
+  }
+
+  async createSocietyRequest(insertRequest: InsertSocietyRequest): Promise<SocietyRequest> {
+    const [request] = await this.db.insert(schema.societyRequests).values(insertRequest).returning();
+    return request;
+  }
+
+  async deleteSocietyRequest(id: string): Promise<boolean> {
+    const result = await this.db.delete(schema.societyRequests).where(eq(schema.societyRequests.id, id)).returning({ id: schema.societyRequests.id });
+    return result.length > 0;
   }
 }
 

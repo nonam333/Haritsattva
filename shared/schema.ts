@@ -15,10 +15,8 @@ export const users = pgTable("users", {
   // Shipping information
   shippingName: text("shipping_name"),
   shippingPhone: text("shipping_phone"),
-  shippingAddress: text("shipping_address"),
-  shippingCity: text("shipping_city"),
-  shippingState: text("shipping_state"),
-  shippingZip: text("shipping_zip"),
+  shippingAddress: text("shipping_address"), // Society name
+  shippingFlatNumber: text("shipping_flat_number"),
 });
 
 export const session = pgTable("session", {
@@ -68,6 +66,19 @@ export const contactSubmissions = pgTable("contact_submissions", {
   createdAt: varchar("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
+// Product Suggestions table
+export const productSuggestions = pgTable("product_suggestions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  suggestedProductName: text("suggested_product_name").notNull(),
+  productDescription: text("product_description"),
+  suggestedCategory: text("suggested_category"),
+  userEmail: text("user_email"),
+  status: varchar("status", { length: 20 }).notNull().default("pending"), // pending, reviewed, implemented, rejected
+  adminNotes: text("admin_notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Orders table
 export const orders = pgTable("orders", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -77,10 +88,8 @@ export const orders = pgTable("orders", {
   shippingName: text("shipping_name").notNull(),
   shippingEmail: text("shipping_email").notNull(),
   shippingPhone: text("shipping_phone").notNull(),
-  shippingAddress: text("shipping_address").notNull(),
-  shippingCity: text("shipping_city").notNull(),
-  shippingState: text("shipping_state").notNull(),
-  shippingZip: text("shipping_zip").notNull(),
+  shippingAddress: text("shipping_address").notNull(), // Society name
+  shippingFlatNumber: text("shipping_flat_number").notNull(),
   paymentMethod: varchar("payment_method", { length: 50 }),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -127,6 +136,26 @@ export const insertOrderItemSchema = createInsertSchema(orderItems).omit({
   id: true,
 });
 
+export const insertProductSuggestionSchema = createInsertSchema(productSuggestions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Society Requests table
+export const societyRequests = pgTable("society_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  societyName: text("society_name").notNull(),
+  phone: text("phone").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertSocietyRequestSchema = createInsertSchema(societyRequests).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type Product = typeof products.$inferSelect;
@@ -141,3 +170,7 @@ export type Order = typeof orders.$inferSelect;
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type OrderItem = typeof orderItems.$inferSelect;
 export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
+export type ProductSuggestion = typeof productSuggestions.$inferSelect;
+export type InsertProductSuggestion = z.infer<typeof insertProductSuggestionSchema>;
+export type SocietyRequest = typeof societyRequests.$inferSelect;
+export type InsertSocietyRequest = z.infer<typeof insertSocietyRequestSchema>;

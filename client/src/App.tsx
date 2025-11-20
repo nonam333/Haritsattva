@@ -21,6 +21,8 @@ import AdminDashboard from "@/pages/admin/AdminDashboard";
 import ProductManagement from "@/pages/admin/ProductManagement";
 import OrderManagement from "@/pages/admin/OrderManagement";
 import CategoryManagement from "@/pages/admin/CategoryManagement";
+import ProductSuggestions from "@/pages/admin/ProductSuggestions";
+import SocietyRequests from "@/pages/admin/SocietyRequests";
 import ContactSubmissions from "@/pages/admin/ContactSubmissions";
 import UserManagement from "@/pages/admin/UserManagement";
 import NotFound from "@/pages/not-found";
@@ -60,6 +62,8 @@ function Router() {
       <ProtectedRoute path="/admin/products" component={ProductManagement} />
       <ProtectedRoute path="/admin/orders" component={OrderManagement} />
       <ProtectedRoute path="/admin/categories" component={CategoryManagement} />
+      <ProtectedRoute path="/admin/suggestions" component={ProductSuggestions} />
+      <ProtectedRoute path="/admin/society-requests" component={SocietyRequests} />
       <ProtectedRoute path="/admin/contacts" component={ContactSubmissions} />
       <ProtectedRoute path="/admin/users" component={UserManagement} />
 

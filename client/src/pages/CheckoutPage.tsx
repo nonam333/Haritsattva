@@ -7,8 +7,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Building2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth"; // Import useAuth
 
 export default function CheckoutPage() {
@@ -17,15 +31,19 @@ export default function CheckoutPage() {
   const { toast } = useToast();
   const [orderPlaced, setOrderPlaced] = useState(false);
   const { user } = useAuth(); // Use the useAuth hook
+  const [requestModalOpen, setRequestModalOpen] = useState(false);
+  const [societyRequestForm, setSocietyRequestForm] = useState({
+    name: "",
+    societyName: "",
+    phone: "",
+  });
 
   const [formData, setFormData] = useState({
     shippingName: "",
     shippingEmail: "",
     shippingPhone: "",
     shippingAddress: "",
-    shippingCity: "",
-    shippingState: "",
-    shippingZip: "",
+    shippingFlatNumber: "",
     paymentMethod: "cod",
     notes: "",
   });
@@ -38,9 +56,7 @@ export default function CheckoutPage() {
         shippingEmail: user.email || "", // Always use user.email if logged in
         shippingPhone: user.shippingPhone || "",
         shippingAddress: user.shippingAddress || "",
-        shippingCity: user.shippingCity || "",
-        shippingState: user.shippingState || "",
-        shippingZip: user.shippingZip || "",
+        shippingFlatNumber: user.shippingFlatNumber || "",
       }));
     }
   }, [user]); // Run when user object changes
@@ -65,6 +81,43 @@ export default function CheckoutPage() {
       toast({ title: "Failed to place order", variant: "destructive" });
     },
   });
+
+  const societyRequestMutation = useMutation({
+    mutationFn: async (data: typeof societyRequestForm) => {
+      const response = await fetch("/api/society-requests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error("Failed to submit request");
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Request submitted!",
+        description: "We'll notify you when we start delivering to your society.",
+      });
+      setSocietyRequestForm({ name: "", societyName: "", phone: "" });
+      setRequestModalOpen(false);
+      setFormData({ ...formData, shippingAddress: "" });
+    },
+    onError: () => {
+      toast({
+        title: "Failed to submit request",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSocietyChange = (value: string) => {
+    if (value === "other") {
+      setRequestModalOpen(true);
+      setFormData({ ...formData, shippingAddress: "" });
+    } else {
+      setFormData({ ...formData, shippingAddress: value });
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,7 +154,7 @@ export default function CheckoutPage() {
               <img
                 src="/logo.png"
                 alt="Haritsattva"
-                className="w-28 h-28 object-contain"
+                className="w-16 h-16 object-contain"
               />
             </div>
             <CheckCircle2 className="w-16 h-16 text-green-600 mx-auto mb-4" />
@@ -136,7 +189,7 @@ export default function CheckoutPage() {
         <img
           src="/logo.png"
           alt="Haritsattva"
-          className="w-18 h-18 object-contain"
+          className="w-16 h-16 object-contain"
         />
       </div>
 
@@ -191,52 +244,41 @@ export default function CheckoutPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="address">Address *</Label>
-                  <Textarea
-                    id="address"
+                  <Label htmlFor="society">Society/Building *</Label>
+                  <Select
                     value={formData.shippingAddress}
-                    onChange={(e) =>
-                      setFormData({ ...formData, shippingAddress: e.target.value })
-                    }
+                    onValueChange={handleSocietyChange}
                     required
-                    rows={3}
-                  />
+                  >
+                    <SelectTrigger id="society">
+                      <SelectValue placeholder="Select your society" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Supertech Eco Village 2">
+                        Supertech Eco Village 2
+                      </SelectItem>
+                      <SelectItem value="Ajnara Homes">Ajnara Homes</SelectItem>
+                      <SelectItem value="Panchsheel Greens 1">
+                        Panchsheel Greens 1
+                      </SelectItem>
+                      <SelectItem value="other">
+                        Other / Not in List?
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                <div className="grid md:grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="city">City *</Label>
-                    <Input
-                      id="city"
-                      value={formData.shippingCity}
-                      onChange={(e) =>
-                        setFormData({ ...formData, shippingCity: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="state">State *</Label>
-                    <Input
-                      id="state"
-                      value={formData.shippingState}
-                      onChange={(e) =>
-                        setFormData({ ...formData, shippingState: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="zip">ZIP Code *</Label>
-                    <Input
-                      id="zip"
-                      value={formData.shippingZip}
-                      onChange={(e) =>
-                        setFormData({ ...formData, shippingZip: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
+                <div>
+                  <Label htmlFor="flatNumber">Flat / Apartment Number *</Label>
+                  <Input
+                    id="flatNumber"
+                    value={formData.shippingFlatNumber}
+                    onChange={(e) =>
+                      setFormData({ ...formData, shippingFlatNumber: e.target.value })
+                    }
+                    placeholder="e.g., A-101, Tower 2, Flat 5B"
+                    required
+                  />
                 </div>
 
                 <div>
@@ -324,6 +366,98 @@ export default function CheckoutPage() {
           </Card>
         </div>
       </div>
+
+      {/* Request Service Modal */}
+      <Dialog open={requestModalOpen} onOpenChange={setRequestModalOpen}>
+        <DialogContent className="sm:max-w-[500px] bg-background/95 backdrop-blur-xl border-2 border-primary/20 shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-primary" />
+              Request Delivery to Your Society
+            </DialogTitle>
+            <DialogDescription>
+              We currently only serve specific societies. Tell us where you are, and we'll notify you when we start delivering there!
+            </DialogDescription>
+          </DialogHeader>
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!societyRequestForm.name.trim() || !societyRequestForm.societyName.trim() || !societyRequestForm.phone.trim()) {
+                toast({
+                  title: "All fields required",
+                  description: "Please fill in all fields",
+                  variant: "destructive",
+                });
+                return;
+              }
+              societyRequestMutation.mutate(societyRequestForm);
+            }}
+            className="space-y-4"
+          >
+            <div>
+              <Label htmlFor="requestName">Name *</Label>
+              <Input
+                id="requestName"
+                value={societyRequestForm.name}
+                onChange={(e) =>
+                  setSocietyRequestForm({ ...societyRequestForm, name: e.target.value })
+                }
+                placeholder="Your name"
+                required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="requestSociety">Society Name *</Label>
+              <Input
+                id="requestSociety"
+                value={societyRequestForm.societyName}
+                onChange={(e) =>
+                  setSocietyRequestForm({ ...societyRequestForm, societyName: e.target.value })
+                }
+                placeholder="e.g., Green Valley Apartments"
+                required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="requestPhone">Phone Number *</Label>
+              <Input
+                id="requestPhone"
+                type="tel"
+                value={societyRequestForm.phone}
+                onChange={(e) =>
+                  setSocietyRequestForm({ ...societyRequestForm, phone: e.target.value })
+                }
+                placeholder="+91 XXXXX XXXXX"
+                required
+              />
+            </div>
+
+            <div className="flex gap-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={() => {
+                  setRequestModalOpen(false);
+                  setSocietyRequestForm({ name: "", societyName: "", phone: "" });
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="flex-1"
+                disabled={societyRequestMutation.isPending}
+              >
+                {societyRequestMutation.isPending ? "Submitting..." : "Submit Request"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

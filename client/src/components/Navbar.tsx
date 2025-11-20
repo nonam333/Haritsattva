@@ -1,9 +1,15 @@
 import { Link, useLocation } from "wouter";
-import { ShoppingCart, Menu, X, Leaf, LogOut, Shield } from "lucide-react";
+import { ShoppingCart, Menu, X, Leaf, LogOut, Shield, User, Mail, Phone, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -14,6 +20,7 @@ interface NavbarProps {}
 export default function Navbar({}: NavbarProps) {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
   const { totalItems } = useCart();
   const { user, isAuthenticated } = useAuth();
   const { isAdmin } = useIsAdmin();
@@ -33,7 +40,7 @@ export default function Navbar({}: NavbarProps) {
           {/* Logo */}
           <Link href="/" data-testid="link-home">
             <div className="flex items-center gap-2 hover-elevate active-elevate-2 px-3 py-2 rounded-md cursor-pointer">
-              <img src="/logo.png" alt="Haritsattva" className="w-8 h-8 object-contain" />
+              <img src="/logo.png" alt="Haritsattva" className="w-16 h-16 object-contain" />
               <span className="text-xl font-semibold text-foreground">Haritsattva</span>
             </div>
           </Link>
@@ -80,7 +87,7 @@ export default function Navbar({}: NavbarProps) {
                     {totalItems > 0 && (
                       <Badge
                         variant="default"
-                        className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                        className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs"
                         data-testid="badge-cart-count"
                       >
                         {totalItems}
@@ -89,7 +96,10 @@ export default function Navbar({}: NavbarProps) {
                   </Button>
                 </Link>
                 <div className="hidden md:flex items-center gap-3 ml-2">
-                  <Avatar className="w-8 h-8">
+                  <Avatar
+                    className="w-8 h-8 cursor-pointer hover:ring-2 hover:ring-primary transition-all"
+                    onClick={() => setProfileModalOpen(true)}
+                  >
                     <AvatarFallback>
                       {user?.email?.charAt(0).toUpperCase()}
                     </AvatarFallback>
@@ -183,6 +193,76 @@ export default function Navbar({}: NavbarProps) {
           </div>
         )}
       </div>
+
+      {/* Profile Modal */}
+      <Dialog open={profileModalOpen} onOpenChange={setProfileModalOpen}>
+        <DialogContent className="sm:max-w-[500px] bg-background/95 backdrop-blur-xl border-2 border-primary/20 shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+              <User className="w-6 h-6 text-primary" />
+              My Profile
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            {/* Email */}
+            <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+              <Mail className="w-5 h-5 text-primary mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-muted-foreground">Email</p>
+                <p className="text-base font-semibold text-foreground">{user?.email || 'Not provided'}</p>
+              </div>
+            </div>
+
+            {/* Name */}
+            <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+              <User className="w-5 h-5 text-primary mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-muted-foreground">Name</p>
+                <p className="text-base font-semibold text-foreground">{user?.shippingName || 'Not provided'}</p>
+              </div>
+            </div>
+
+            {/* Phone */}
+            <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+              <Phone className="w-5 h-5 text-primary mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-muted-foreground">Phone</p>
+                <p className="text-base font-semibold text-foreground">{user?.shippingPhone || 'Not provided'}</p>
+              </div>
+            </div>
+
+            {/* Address */}
+            <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+              <MapPin className="w-5 h-5 text-primary mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-muted-foreground">Address</p>
+                {user?.shippingAddress ? (
+                  <div className="text-base font-semibold text-foreground space-y-1">
+                    <p>{user.shippingAddress}</p>
+                    <p>{[user.shippingCity, user.shippingState, user.shippingZip].filter(Boolean).join(', ')}</p>
+                  </div>
+                ) : (
+                  <p className="text-base font-semibold text-foreground">Not provided</p>
+                )}
+              </div>
+            </div>
+
+            {/* Log Out Button */}
+            <Button
+              className="w-full mt-4"
+              variant="destructive"
+              onClick={async () => {
+                setProfileModalOpen(false);
+                await fetch('/api/auth/logout', { method: 'POST' });
+                window.location.href = '/login';
+              }}
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Log Out
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </nav>
   );
 }
