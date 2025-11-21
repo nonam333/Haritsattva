@@ -103,8 +103,8 @@ export default function Navbar({}: NavbarProps) {
                     className="w-8 h-8 cursor-pointer hover:ring-2 hover:ring-primary transition-all"
                     onClick={() => setProfileModalOpen(true)}
                   >
-                    <AvatarFallback>
-                      {user?.email?.charAt(0).toUpperCase()}
+                    <AvatarFallback className="bg-gray-200 dark:bg-gray-700">
+                      <User className="w-4 h-4 text-gray-600 dark:text-gray-300" />
                     </AvatarFallback>
                   </Avatar>
                   <Button
@@ -270,21 +270,25 @@ export default function Navbar({}: NavbarProps) {
               </div>
             </div>
 
-            {/* Address */}
+            {/* Society */}
             <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
               <MapPin className="w-5 h-5 text-primary mt-0.5" />
               <div className="flex-1">
-                <p className="text-sm font-medium text-muted-foreground">Address</p>
-                {user?.shippingAddress ? (
-                  <div className="text-base font-semibold text-foreground space-y-1">
-                    <p>{user.shippingAddress}</p>
-                    <p>{[user.shippingCity, user.shippingState, user.shippingZip].filter(Boolean).join(', ')}</p>
-                  </div>
-                ) : (
-                  <p className="text-base font-semibold text-foreground">Not provided</p>
-                )}
+                <p className="text-sm font-medium text-muted-foreground">Society</p>
+                <p className="text-base font-semibold text-foreground">{user?.shippingAddress || 'Not provided'}</p>
               </div>
             </div>
+
+            {/* Flat Number */}
+            {user?.shippingFlatNumber && (
+              <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                <MapPin className="w-5 h-5 text-primary mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-muted-foreground">Flat/House Number</p>
+                  <p className="text-base font-semibold text-foreground">{user.shippingFlatNumber}</p>
+                </div>
+              </div>
+            )}
 
             {/* Log Out Button */}
             <Button
