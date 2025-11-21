@@ -8,8 +8,8 @@ export function useAuth() {
     retry: false,
   });
 
-  // Debug: Log user data
-  console.log('[useAuth] User data:', user);
+  // Debug: Log user data with full details
+  console.log('[useAuth] User data:', JSON.stringify(user, null, 2));
 
   return {
     user,
