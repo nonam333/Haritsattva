@@ -36,11 +36,11 @@ export default function Navbar({}: NavbarProps) {
 
   return (
     <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" data-testid="link-home">
-            <div className="flex items-center gap-2 hover-elevate active-elevate-2 px-2 py-1 rounded-md cursor-pointer">
+            <div className="flex items-center gap-2 hover-elevate active-elevate-2 px-2 py-1 rounded-md cursor-pointer flex-shrink-0">
               <img src="/logo.png" alt="Haritsattva" className="w-10 h-10 object-contain" />
               <span className="text-lg font-semibold text-foreground">Haritsattva</span>
             </div>
@@ -71,7 +71,7 @@ export default function Navbar({}: NavbarProps) {
           </div>
 
           {/* Cart Icon, User & Theme Toggle */}
-          <div className="flex items-center gap-0.5 sm:gap-1 md:gap-2">
+          <div className="flex items-center gap-1 flex-shrink-0">
             <div className="hidden lg:block">
               <ThemeToggle />
             </div>
@@ -79,13 +79,13 @@ export default function Navbar({}: NavbarProps) {
               <>
                 {isAdmin && (
                   <Link href="/admin" data-testid="link-admin">
-                    <Button size="icon" variant="ghost" title="Admin Panel">
+                    <Button size="icon" variant="ghost" title="Admin Panel" className="flex-shrink-0">
                       <Shield className="w-5 h-5" />
                     </Button>
                   </Link>
                 )}
                 <Link href="/cart" data-testid="link-cart">
-                  <Button size="icon" variant="ghost" className="relative">
+                  <Button size="icon" variant="ghost" className="relative flex-shrink-0">
                     <ShoppingCart className="w-5 h-5" />
                     {totalItems > 0 && (
                       <Badge
@@ -137,7 +137,7 @@ export default function Navbar({}: NavbarProps) {
             <Button
               size="icon"
               variant="ghost"
-              className="md:hidden"
+              className="md:hidden flex-shrink-0 ml-1"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               data-testid="button-mobile-menu"
             >
