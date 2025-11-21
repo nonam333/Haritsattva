@@ -78,7 +78,7 @@ export default function Navbar({}: NavbarProps) {
             {isAuthenticated ? (
               <>
                 {isAdmin && (
-                  <Link href="/admin" data-testid="link-admin" className="hidden sm:block">
+                  <Link href="/admin" data-testid="link-admin">
                     <Button size="icon" variant="ghost" title="Admin Panel">
                       <Shield className="w-5 h-5" />
                     </Button>
@@ -90,7 +90,7 @@ export default function Navbar({}: NavbarProps) {
                     {totalItems > 0 && (
                       <Badge
                         variant="default"
-                        className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                        className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs pointer-events-none"
                         data-testid="badge-cart-count"
                       >
                         {totalItems}
@@ -162,15 +162,40 @@ export default function Navbar({}: NavbarProps) {
                 </Link>
               ))}
               {isAuthenticated && (
-                <Link href="/orders">
+                <>
+                  <Link href="/orders">
+                    <Button
+                      variant="ghost"
+                      className={`w-full justify-start ${location === "/orders" ? "bg-accent" : ""}`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      My Orders
+                    </Button>
+                  </Link>
+                  {isAdmin && (
+                    <Link href="/admin">
+                      <Button
+                        variant="ghost"
+                        className={`w-full justify-start ${location === "/admin" ? "bg-accent" : ""}`}
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <Shield className="w-4 h-4 mr-2" />
+                        Admin Panel
+                      </Button>
+                    </Link>
+                  )}
                   <Button
                     variant="ghost"
-                    className={`w-full justify-start ${location === "/orders" ? "bg-accent" : ""}`}
-                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full justify-start"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      setProfileModalOpen(true);
+                    }}
                   >
-                    My Orders
+                    <User className="w-4 h-4 mr-2" />
+                    My Profile
                   </Button>
-                </Link>
+                </>
               )}
               {/* Dark Mode Toggle in Mobile Menu */}
               <div className="flex items-center justify-between px-3 py-2">
