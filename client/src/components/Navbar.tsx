@@ -38,13 +38,15 @@ export default function Navbar({}: NavbarProps) {
     <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/" data-testid="link-home">
-            <div className="flex items-center gap-2 hover-elevate active-elevate-2 px-2 py-1 rounded-md cursor-pointer flex-shrink-0">
-              <img src="/logo.png" alt="Haritsattva" className="w-10 h-10 object-contain" />
-              <span className="text-lg font-semibold text-foreground">Haritsattva</span>
-            </div>
-          </Link>
+          {/* Logo - Hidden on admin pages */}
+          {!location.startsWith('/admin') && (
+            <Link href="/" data-testid="link-home">
+              <div className="flex items-center gap-2 hover-elevate active-elevate-2 px-2 py-1 rounded-md cursor-pointer flex-shrink-0">
+                <img src="/logo.png" alt="Haritsattva" className="w-10 h-10 object-contain" />
+                <span className="text-lg font-semibold text-foreground">Haritsattva</span>
+              </div>
+            </Link>
+          )}
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-1">
