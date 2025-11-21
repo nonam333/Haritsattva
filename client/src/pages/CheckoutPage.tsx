@@ -64,9 +64,19 @@ export default function CheckoutPage() {
 
   const createOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
+      console.log('[Checkout] Placing order:', orderData);
       const response = await apiRequest("POST", "/api/orders", orderData);
-      if (!response.ok) throw new Error("Failed to create order");
-      return response.json();
+      console.log('[Checkout] Order response status:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('[Checkout] Order failed:', errorData);
+        throw new Error(errorData.error || 'Failed to create order');
+      }
+
+      const result = await response.json();
+      console.log('[Checkout] Order created:', result);
+      return result;
     },
     onSuccess: () => {
       setOrderPlaced(true);
@@ -74,7 +84,7 @@ export default function CheckoutPage() {
       toast({ title: "Order placed successfully!" });
     },
     onError: (error: any) => {
-      console.error("Order placement error:", error);
+      console.error("[Checkout] Order placement error:", error);
       toast({ title: "Failed to place order", variant: "destructive", description: error.message });
     },
   });

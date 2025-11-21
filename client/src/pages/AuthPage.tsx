@@ -11,6 +11,10 @@ export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(location === '/login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [society, setSociety] = useState('');
+  const [flatNumber, setFlatNumber] = useState('');
   const [error, setError] = useState('');
   const queryClient = useQueryClient();
 
@@ -26,8 +30,20 @@ export default function AuthPage() {
 
     console.log('[AuthPage] Starting authentication:', { endpoint, email });
 
+    // Include profile data for signup
+    const requestData = isLogin
+      ? { email, password }
+      : {
+          email,
+          password,
+          shippingName: name,
+          shippingPhone: phone,
+          shippingAddress: society,
+          shippingFlatNumber: flatNumber
+        };
+
     try {
-      const response = await apiRequest('POST', endpoint, { email, password });
+      const response = await apiRequest('POST', endpoint, requestData);
 
       console.log('[AuthPage] Auth response received:', response.status);
 
@@ -102,6 +118,56 @@ export default function AuthPage() {
               required
             />
           </div>
+
+          {/* Additional fields for signup */}
+          {!isLogin && (
+            <>
+              <div>
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  placeholder="Enter your full name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                  placeholder="Enter your phone number"
+                />
+              </div>
+              <div>
+                <Label htmlFor="society">Society Name</Label>
+                <Input
+                  id="society"
+                  type="text"
+                  value={society}
+                  onChange={(e) => setSociety(e.target.value)}
+                  required
+                  placeholder="Enter your society name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="flatNumber">Flat/House Number</Label>
+                <Input
+                  id="flatNumber"
+                  type="text"
+                  value={flatNumber}
+                  onChange={(e) => setFlatNumber(e.target.value)}
+                  placeholder="Enter flat/house number (optional)"
+                />
+              </div>
+            </>
+          )}
+
           {error && <p className="text-red-500">{error}</p>}
           <Button type="submit" className="w-full">
             {isLogin ? 'Login' : 'Sign Up'}

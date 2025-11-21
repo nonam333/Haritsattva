@@ -29,7 +29,7 @@ import { eq } from "drizzle-orm";
 export function registerApiRoutes(app: Express) {
   // ============== AUTH ROUTES ==============
   app.post("/api/auth/signup", async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, shippingName, shippingPhone, shippingAddress, shippingFlatNumber } = req.body;
     if (!email || !password || typeof email !== "string" || typeof password !== "string") {
       return res.status(400).json({ error: "Invalid input" });
     }
@@ -41,7 +41,11 @@ export function registerApiRoutes(app: Express) {
         id: userId,
         email,
         hashed_password: hashedPassword,
-        role: 'user'
+        role: 'user',
+        shippingName: shippingName || null,
+        shippingPhone: shippingPhone || null,
+        shippingAddress: shippingAddress || null,
+        shippingFlatNumber: shippingFlatNumber || null
       });
 
       const session = await lucia.createSession(userId, {});
