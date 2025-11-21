@@ -4,7 +4,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLocation } from "wouter";
 import { useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient'; // Import apiRequest for absolute URLs
+import { apiRequest } from '@/lib/queryClient';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AuthPage() {
   const [location, setLocation] = useLocation();
@@ -16,11 +30,56 @@ export default function AuthPage() {
   const [society, setSociety] = useState('');
   const [flatNumber, setFlatNumber] = useState('');
   const [error, setError] = useState('');
+  const [requestModalOpen, setRequestModalOpen] = useState(false);
+  const [societyRequestForm, setSocietyRequestForm] = useState({
+    name: "",
+    societyName: "",
+    phone: "",
+  });
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   useEffect(() => {
     setIsLogin(location === '/login');
   }, [location]);
+
+  const handleSocietyChange = (value: string) => {
+    if (value === "other") {
+      setRequestModalOpen(true);
+      setSociety("");
+    } else {
+      setSociety(value);
+    }
+  };
+
+  const handleSocietyRequest = async () => {
+    if (!societyRequestForm.name.trim() || !societyRequestForm.societyName.trim() || !societyRequestForm.phone.trim()) {
+      toast({
+        title: "Please fill all fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await apiRequest("POST", "/api/society-requests", societyRequestForm);
+      if (!response.ok) throw new Error("Failed to submit request");
+
+      toast({
+        title: "Request submitted!",
+        description: "We'll notify you when we start delivering to your society.",
+      });
+      setSocietyRequestForm({ name: "", societyName: "", phone: "" });
+      setRequestModalOpen(false);
+      setSociety("");
+    } catch (error) {
+      toast({
+        title: "Failed to submit request",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -146,14 +205,27 @@ export default function AuthPage() {
               </div>
               <div>
                 <Label htmlFor="society">Society Name</Label>
-                <Input
-                  id="society"
-                  type="text"
+                <Select
                   value={society}
-                  onChange={(e) => setSociety(e.target.value)}
+                  onValueChange={handleSocietyChange}
                   required
-                  placeholder="Enter your society name"
-                />
+                >
+                  <SelectTrigger id="society">
+                    <SelectValue placeholder="Select your society" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Supertech Eco Village 2">
+                      Supertech Eco Village 2
+                    </SelectItem>
+                    <SelectItem value="Ajnara Homes">Ajnara Homes</SelectItem>
+                    <SelectItem value="Panchsheel Greens 1">
+                      Panchsheel Greens 1
+                    </SelectItem>
+                    <SelectItem value="other">
+                      Other / Not in List?
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label htmlFor="flatNumber">Flat/House Number</Label>
@@ -180,6 +252,54 @@ export default function AuthPage() {
           </button>
         </p>
       </div>
+
+      {/* Society Request Modal */}
+      <Dialog open={requestModalOpen} onOpenChange={setRequestModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Request Delivery to Your Society</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="requestName">Your Name *</Label>
+              <Input
+                id="requestName"
+                value={societyRequestForm.name}
+                onChange={(e) =>
+                  setSocietyRequestForm({ ...societyRequestForm, name: e.target.value })
+                }
+                placeholder="Enter your name"
+              />
+            </div>
+            <div>
+              <Label htmlFor="requestSociety">Society Name *</Label>
+              <Input
+                id="requestSociety"
+                value={societyRequestForm.societyName}
+                onChange={(e) =>
+                  setSocietyRequestForm({ ...societyRequestForm, societyName: e.target.value })
+                }
+                placeholder="Enter your society name"
+              />
+            </div>
+            <div>
+              <Label htmlFor="requestPhone">Phone Number *</Label>
+              <Input
+                id="requestPhone"
+                type="tel"
+                value={societyRequestForm.phone}
+                onChange={(e) =>
+                  setSocietyRequestForm({ ...societyRequestForm, phone: e.target.value })
+                }
+                placeholder="Enter your phone number"
+              />
+            </div>
+            <Button onClick={handleSocietyRequest} className="w-full">
+              Submit Request
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
