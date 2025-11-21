@@ -30,6 +30,8 @@ export function registerApiRoutes(app: Express) {
   // ============== AUTH ROUTES ==============
   app.post("/api/auth/signup", async (req, res) => {
     const { email, password, shippingName, shippingPhone, shippingAddress, shippingFlatNumber } = req.body;
+    console.log('[SIGNUP] Received data:', { email, shippingName, shippingPhone, shippingAddress, shippingFlatNumber });
+
     if (!email || !password || typeof email !== "string" || typeof password !== "string") {
       return res.status(400).json({ error: "Invalid input" });
     }
@@ -37,7 +39,7 @@ export function registerApiRoutes(app: Express) {
     const userId = generateId(15);
 
     try {
-      await storage.createUser({
+      const userData = {
         id: userId,
         email,
         hashed_password: hashedPassword,
@@ -46,7 +48,9 @@ export function registerApiRoutes(app: Express) {
         shippingPhone: shippingPhone || null,
         shippingAddress: shippingAddress || null,
         shippingFlatNumber: shippingFlatNumber || null
-      });
+      };
+      console.log('[SIGNUP] Creating user with data:', userData);
+      await storage.createUser(userData);
 
       const session = await lucia.createSession(userId, {});
       const sessionCookie = lucia.createSessionCookie(session.id);
@@ -108,6 +112,8 @@ export function registerApiRoutes(app: Express) {
     }
 
     const { session, user } = await lucia.validateSession(sessionId);
+    console.log('[GET /api/auth/user] User from session:', JSON.stringify(user, null, 2));
+
     if (session && session.fresh) {
       const sessionCookie = lucia.createSessionCookie(session.id);
       res.appendHeader("Set-Cookie", sessionCookie.serialize());
