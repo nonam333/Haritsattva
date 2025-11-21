@@ -146,7 +146,7 @@ export default function OrderManagement() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {order.createdAt ? format(new Date(order.createdAt), "MMM d, yyyy") : "N/A"}
+                    {order.createdAt ? format(new Date(order.createdAt), "MMM d, yyyy 'at' h:mm a") : "N/A"}
                   </TableCell>
                   <TableCell>
                     <Select
@@ -203,8 +203,8 @@ export default function OrderManagement() {
                                 </Badge>
                               </div>
                               <div>
-                                <p className="text-muted-foreground">Date</p>
-                                <p>{order.createdAt ? format(new Date(order.createdAt), "PPP") : "N/A"}</p>
+                                <p className="text-muted-foreground">Order Time</p>
+                                <p>{order.createdAt ? format(new Date(order.createdAt), "PPP 'at' p") : "N/A"}</p>
                               </div>
                               <div>
                                 <p className="text-muted-foreground">Total Amount</p>

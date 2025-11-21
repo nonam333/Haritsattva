@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Package } from "lucide-react";
 import { format } from "date-fns";
+import { getQueryFn } from "@/lib/queryClient";
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800",
@@ -16,13 +17,7 @@ const statusColors: Record<string, string> = {
 export default function OrderHistoryPage() {
   const { data: ordersData, isLoading } = useQuery<any[]>({
     queryKey: ["/api/orders/my-orders"],
-    queryFn: async () => {
-      const response = await fetch("/api/orders/my-orders", {
-        credentials: "include",
-      });
-      if (!response.ok) throw new Error("Failed to fetch orders");
-      return response.json();
-    },
+    queryFn: getQueryFn({ on401: "throw" }),
   });
 
   // Sort orders by latest first
@@ -70,7 +65,7 @@ export default function OrderHistoryPage() {
                   </CardTitle>
                   <p className="text-sm text-muted-foreground">
                     {order.createdAt
-                      ? format(new Date(order.createdAt), "MMMM d, yyyy")
+                      ? format(new Date(order.createdAt), "MMM d, yyyy 'at' h:mm a")
                       : "N/A"}
                   </p>
                 </div>
