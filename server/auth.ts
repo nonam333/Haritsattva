@@ -19,6 +19,10 @@ export const lucia = new Lucia(adapter, {
 		return {
 			email: attributes.email,
 			role: attributes.role,
+			shippingName: attributes.shippingName,
+			shippingPhone: attributes.shippingPhone,
+			shippingAddress: attributes.shippingAddress,
+			shippingFlatNumber: attributes.shippingFlatNumber,
 		};
 	}
 });
@@ -29,6 +33,10 @@ declare module "lucia" {
     DatabaseUserAttributes: {
       email: string;
       role: "user" | "admin";
+      shippingName: string | null;
+      shippingPhone: string | null;
+      shippingAddress: string | null;
+      shippingFlatNumber: string | null;
     }
 	}
 }
