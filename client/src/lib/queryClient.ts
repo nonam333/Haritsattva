@@ -2,15 +2,17 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 // -----------------------------------------------------------------
 // 1. SETUP THE SERVER URL
-// CHANGE THIS to your specific Render URL.
-// Do not leave a trailing slash (e.g., use "https://myapp.onrender.com")
+// In production, use the same origin as the frontend (single deployment)
+// In development, use localhost:5000 (or the PORT from env)
 // -----------------------------------------------------------------
-const BASE_URL = "https://haritsattvava-api.onrender.com"; 
+const BASE_URL = typeof window !== 'undefined'
+  ? window.location.origin
+  : "https://haritsattvava-api.onrender.com";
 
 // Helper: Combines the Base URL with the API path
 function getFullUrl(path: string) {
   if (path.startsWith("http")) return path; // Already has domain
-  
+
   // Ensure there is exactly one slash between Base URL and path
   const cleanPath = path.startsWith("/") ? path : `/${path}`;
   return `${BASE_URL}${cleanPath}`;
