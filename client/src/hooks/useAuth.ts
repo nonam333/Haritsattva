@@ -8,6 +8,9 @@ export function useAuth() {
     retry: false,
   });
 
+  // Debug: Log user data
+  console.log('[useAuth] User data:', user);
+
   return {
     user,
     isLoading,
