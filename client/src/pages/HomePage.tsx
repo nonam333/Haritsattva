@@ -4,44 +4,19 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Leaf, Truck, Sparkles } from "lucide-react";
 import { Link } from "wouter";
 import { useScrollAnimation } from "@/hooks/use-scroll-animation";
-
-// Product images
-import bellPepperImage from "@assets/generated_images/Red_bell_pepper_product_a9d38c02.png";
-import carrotImage from "@assets/generated_images/Carrots_and_broccoli_product_46d36f44.png";
-import broccoliImage from "@assets/generated_images/Fresh_broccoli_product_37d74546.png";
-import avocadoImage from "@assets/generated_images/Halved_avocado_product_8a3a377a.png";
+import { useQuery } from "@tanstack/react-query";
 
 export default function HomePage() {
   const productsSection = useScrollAnimation();
   const whyChooseSection = useScrollAnimation();
 
-  //todo: remove mock functionality
-  const featuredProducts = [
-    {
-      id: "1",
-      name: "Bell Pepper",
-      price: 99.00,
-      imageUrl: bellPepperImage,
-    },
-    {
-      id: "2",
-      name: "Carrot Bundle",
-      price: 49.00,
-      imageUrl: carrotImage,
-    },
-    {
-      id: "3",
-      name: "Broccoli",
-      price: 65.00,
-      imageUrl: broccoliImage,
-    },
-    {
-      id: "4",
-      name: "Avocado",
-      price: 85.00,
-      imageUrl: avocadoImage,
-    },
-  ];
+  // Fetch real products from API
+  const { data: products, isLoading } = useQuery({
+    queryKey: ["/api/products"],
+  });
+
+  // Display first 10 products (or all if less than 10)
+  const featuredProducts = products?.slice(0, 10) || [];
 
   const features = [
     {
