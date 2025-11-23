@@ -198,6 +198,36 @@
  * need to be distinguished from eachother visually.
  */
 @layer utilities {
+  /* Premium Glassmorphism Utilities */
+  .glass {
+    @apply bg-white/10 backdrop-blur-xl border border-white/20;
+  }
+
+  .glass-strong {
+    @apply bg-white/15 backdrop-blur-2xl border border-white/30;
+  }
+
+  .glass-dark {
+    @apply bg-black/20 backdrop-blur-xl border border-white/10;
+  }
+
+  /* Neon Mint Glow Effects */
+  .glow-neon {
+    box-shadow: 0 0 20px rgba(0, 255, 148, 0.4), 0 0 40px rgba(0, 255, 148, 0.2);
+  }
+
+  .glow-neon-strong {
+    box-shadow: 0 0 30px rgba(0, 255, 148, 0.6), 0 0 60px rgba(0, 255, 148, 0.4), 0 0 90px rgba(0, 255, 148, 0.2);
+  }
+
+  /* Premium Shadows */
+  .shadow-premium {
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  .shadow-premium-lg {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
 
   /* Hide ugly search cancel button in Chrome until we can style it properly */
   input[type="search"]::-webkit-search-cancel-button {

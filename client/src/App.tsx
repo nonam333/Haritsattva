@@ -8,6 +8,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import { useAuth } from "@/hooks/useAuth";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ScrollToTop from "@/components/ScrollToTop";
 import LandingPage from "@/pages/LandingPage";
 import HomePage from "@/pages/HomePage";
 import ProductsPage from "@/pages/ProductsPage";
@@ -67,8 +68,8 @@ function Router() {
       <ProtectedRoute path="/admin/contacts" component={ContactSubmissions} />
       <ProtectedRoute path="/admin/users" component={UserManagement} />
 
-      {/* Conditional Home Page - MUST BE LAST before NOT FOUND */}
-      <Route path="/" component={isAuthenticated ? HomePage : LandingPage} />
+      {/* Home Page - Now visible to all users */}
+      <Route path="/" component={HomePage} />
 
       {/* Fallback route */}
       <Route component={NotFound} />
@@ -84,6 +85,7 @@ function App() {
       <ThemeProvider defaultTheme="light">
         <CartProvider>
           <TooltipProvider>
+            <ScrollToTop />
             <div className="min-h-screen flex flex-col">
               <Navbar />
               <main className="flex-1">

@@ -1,13 +1,16 @@
-import { Button } from "@/components/ui/button";
+import GlassButton from "@/components/GlassButton";
+import GlassCard from "@/components/GlassCard";
 import { ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { useState, useEffect } from "react";
-import heroImage1 from "@assets/generated_images/Hero_fresh_produce_plate_9c1578ca.png";
-import heroImage2 from "@assets/generated_images/Fresh_tomatoes_product_d8a652a1.png";
-import heroImage3 from "@assets/generated_images/Fresh_strawberries_product_3b6383f9.png";
-import heroImage4 from "@assets/generated_images/Carrots_and_broccoli_product_46d36f44.png";
 
-const heroImages = [heroImage1, heroImage2, heroImage3, heroImage4];
+// Using Unsplash images for hero carousel
+const heroImages = [
+  "https://images.unsplash.com/photo-1610348725531-843dff563e2c?w=1920&q=80",
+  "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=1920&q=80",
+  "https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=1920&q=80",
+  "https://images.unsplash.com/photo-1579113800032-c38bd7635818?w=1920&q=80",
+];
 
 export default function Hero() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -26,56 +29,77 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="relative min-h-[500px] sm:min-h-[600px] md:min-h-[700px] flex items-center justify-center overflow-hidden bg-gradient-to-br from-black to-gray-900">
+    <section className="relative min-h-[600px] sm:min-h-[700px] lg:min-h-[800px] flex items-center justify-center overflow-hidden bg-darkCharcoal">
       {/* Background Image with Dark Overlay */}
       <div className="absolute inset-0">
         <img
           src={heroImages[currentImageIndex]}
           alt="Fresh organic produce"
           loading="eager"
-          className={`w-full h-full object-cover opacity-40 transition-opacity duration-500 ${
-            isVisible ? "opacity-40" : "opacity-0"
+          className={`w-full h-full object-cover transition-opacity duration-700 ${
+            isVisible ? "opacity-50" : "opacity-0"
           }`}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
+        <div className="absolute inset-0 bg-gradient-to-b from-darkCharcoal/70 via-darkCharcoal/50 to-darkCharcoal/80" />
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <div className="mb-4 sm:mb-6 flex justify-center">
-          <img
-            src="/logo.png"
-            alt="Haritsattva"
-            className="w-20 h-20 sm:w-24 sm:h-24 object-contain filter invert(1)"
-          />
-        </div>
-        <h1
-          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight px-4"
-          data-testid="text-hero-title"
-        >
-          Fresh & Organic
-        </h1>
-        <p
-          className="text-sm sm:text-base md:text-lg text-white/90 mb-6 sm:mb-8 max-w-2xl mx-auto px-4"
-          data-testid="text-hero-subtitle"
-        >
-          Premium quality fruits and vegetables delivered fresh to your doorstep.
-          Sustainably sourced for a healthier you and a healthier planet.
-        </p>
-        <Link href="/products">
-          <Button
-            size="default"
-            className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base font-semibold rounded-lg group shadow-lg hover:shadow-xl transition-all duration-300"
-            data-testid="button-shop-now"
+      {/* Glassmorphic Content Card */}
+      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-12 py-16 sm:py-20">
+        <div className="text-center">
+          {/* Logo */}
+          <div className="mb-6 sm:mb-8 flex justify-center">
+            <img
+              src="/logo.png"
+              alt="Haritsattva"
+              className="w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 object-contain filter drop-shadow-2xl"
+            />
+          </div>
+
+          {/* Glassmorphic Card Container */}
+          <GlassCard
+            variant="strong"
+            className="max-w-3xl mx-auto p-8 sm:p-12 lg:p-16 space-y-6 sm:space-y-8"
+            hover={false}
           >
-            Shop Now
-            <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
-          </Button>
-        </Link>
+            {/* Massive Headline with Premium Typography */}
+            <h1
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-heading font-bold text-white leading-tight tracking-tightest"
+              data-testid="text-hero-title"
+            >
+              Fresh & Organic
+              <span className="block text-neonMint mt-2">Delivered Fresh</span>
+            </h1>
+
+            {/* Subtitle with Better Spacing */}
+            <p
+              className="text-base sm:text-lg md:text-xl text-white/90 max-w-2xl mx-auto leading-relaxed"
+              data-testid="text-hero-subtitle"
+            >
+              Premium quality fruits and vegetables delivered to your doorstep.
+              <span className="block mt-2 text-neonMint/80 font-semibold">
+                Sustainably sourced for a healthier you and planet.
+              </span>
+            </p>
+
+            {/* Neon Mint CTA Button with Glow */}
+            <div className="pt-4">
+              <Link href="/products">
+                <GlassButton
+                  size="lg"
+                  className="text-base sm:text-lg font-bold group"
+                  data-testid="button-shop-now"
+                >
+                  Shop Now
+                  <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </GlassButton>
+              </Link>
+            </div>
+          </GlassCard>
+        </div>
       </div>
 
-      {/* Carousel Indicators */}
-      <div className="absolute bottom-4 sm:bottom-6 left-1/2 transform -translate-x-1/2 flex gap-2 z-20">
+      {/* Carousel Indicators with Neon Mint Accent */}
+      <div className="absolute bottom-6 sm:bottom-8 left-1/2 transform -translate-x-1/2 flex gap-3 z-20">
         {heroImages.map((_, index) => (
           <button
             key={index}
@@ -86,10 +110,10 @@ export default function Hero() {
                 setIsVisible(true);
               }, 300);
             }}
-            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+            className={`h-2 rounded-full transition-all duration-300 ${
               index === currentImageIndex
-                ? "bg-white w-6 sm:w-8"
-                : "bg-white/50 hover:bg-white/75"
+                ? "bg-neonMint w-8 sm:w-10 glow-neon"
+                : "bg-white/30 w-2 hover:bg-white/50"
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />

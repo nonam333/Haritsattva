@@ -5,6 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { Package } from "lucide-react";
 import { format } from "date-fns";
 import { getQueryFn } from "@/lib/queryClient";
+import GlassCard from "@/components/GlassCard";
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800",
@@ -38,32 +39,32 @@ export default function OrderHistoryPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-16">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">My Orders</h1>
-        <p className="text-muted-foreground">View and track your orders</p>
+    <div className="max-w-5xl mx-auto px-6 py-20">
+      <div className="mb-16">
+        <h1 className="text-5xl md:text-7xl font-heading font-bold tracking-tight mb-6">
+          My <span className="text-neonMint">Orders</span>
+        </h1>
+        <p className="text-muted-foreground text-xl leading-relaxed">View and track your orders</p>
       </div>
 
       {orders && orders.length === 0 && (
-        <Card>
-          <CardContent className="py-16 text-center">
-            <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">No orders yet</h2>
-            <p className="text-muted-foreground">Start shopping to see your orders here</p>
-          </CardContent>
-        </Card>
+        <GlassCard className="p-20 text-center shadow-premium-lg">
+          <Package className="w-24 h-24 text-neonMint/40 mx-auto mb-8" />
+          <h2 className="text-3xl font-heading font-bold mb-4 tracking-tight">No orders yet</h2>
+          <p className="text-muted-foreground text-lg">Start shopping to see your orders here</p>
+        </GlassCard>
       )}
 
-      <div className="space-y-6">
+      <div className="space-y-8">
         {orders?.map((order) => (
-          <Card key={order.id}>
-            <CardHeader>
-              <div className="flex justify-between items-start">
+          <GlassCard key={order.id} className="p-8 hover:scale-[1.01] transition-all duration-300 shadow-premium">
+            <div className="mb-6">
+              <div className="flex justify-between items-start flex-wrap gap-4">
                 <div>
-                  <CardTitle className="text-base">
+                  <h3 className="text-2xl font-heading font-bold tracking-tight mb-2">
                     Order #{order.id.slice(0, 8).toUpperCase()}
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">
+                  </h3>
+                  <p className="text-base text-muted-foreground">
                     {order.createdAt
                       ? format(new Date(order.createdAt), "MMM d, yyyy 'at' h:mm a")
                       : "N/A"}
@@ -73,29 +74,29 @@ export default function OrderHistoryPage() {
                   {order.status}
                 </Badge>
               </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
+            </div>
+            <div className="space-y-6">
               {/* Order Items */}
               <div>
-                <h3 className="font-semibold mb-2">Items</h3>
-                <div className="space-y-2">
+                <h4 className="font-heading font-bold text-lg mb-4 tracking-tight">Items</h4>
+                <div className="space-y-3">
                   {order.items?.map((item: any) => (
-                    <div key={item.id} className="flex justify-between text-sm">
-                      <span>
+                    <div key={item.id} className="flex justify-between text-base">
+                      <span className="text-muted-foreground">
                         {item.productName} × {item.quantity}
                       </span>
-                      <span>₹{(parseFloat(item.price) * item.quantity).toFixed(2)}</span>
+                      <span className="font-bold">₹{(parseFloat(item.price) * item.quantity).toFixed(2)}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <Separator />
+              <Separator className="bg-white/20" />
 
               {/* Shipping Info */}
               <div>
-                <h3 className="font-semibold mb-2">Shipping Address</h3>
-                <p className="text-sm text-muted-foreground">
+                <h4 className="font-heading font-bold text-lg mb-4 tracking-tight">Shipping Address</h4>
+                <p className="text-base text-muted-foreground leading-relaxed">
                   {order.shippingName}
                   <br />
                   {order.shippingAddress}
@@ -106,25 +107,25 @@ export default function OrderHistoryPage() {
                 </p>
               </div>
 
-              <Separator />
+              <Separator className="bg-white/20" />
 
               {/* Total */}
-              <div className="flex justify-between items-center">
-                <span className="font-semibold">Total</span>
-                <span className="text-xl font-bold">₹{order.total}</span>
+              <div className="flex justify-between items-center pt-2">
+                <span className="font-heading font-bold text-xl">Total</span>
+                <span className="text-3xl font-bold text-neonMint">₹{order.total}</span>
               </div>
 
               {order.notes && (
                 <>
-                  <Separator />
+                  <Separator className="bg-white/20" />
                   <div>
-                    <h3 className="font-semibold mb-2">Order Notes</h3>
-                    <p className="text-sm text-muted-foreground">{order.notes}</p>
+                    <h4 className="font-heading font-bold text-lg mb-4 tracking-tight">Order Notes</h4>
+                    <p className="text-base text-muted-foreground leading-relaxed">{order.notes}</p>
                   </div>
                 </>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </GlassCard>
         ))}
       </div>
     </div>

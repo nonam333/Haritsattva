@@ -5,6 +5,9 @@ import { Label } from "@/components/ui/label";
 import { useLocation } from "wouter";
 import { useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
+import GlassCard from "@/components/GlassCard";
+import GlassButton from "@/components/GlassButton";
+import { Building2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -153,9 +156,18 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md dark:bg-gray-800">
-        <h1 className="text-2xl font-bold text-center">{isLogin ? 'Login' : 'Sign Up'}</h1>
+    <div className="flex items-center justify-center min-h-screen bg-darkCharcoal py-12 px-4">
+      <GlassCard className="w-full max-w-md p-10 shadow-premium-lg">
+        <div className="mb-8 flex justify-center">
+          <img
+            src="/logo.png"
+            alt="Haritsattva"
+            className="w-20 h-20 object-contain drop-shadow-2xl"
+          />
+        </div>
+        <h1 className="text-4xl md:text-5xl font-heading font-bold text-center mb-8 tracking-tight">
+          {isLogin ? <span>Welcome <span className="text-neonMint">Back</span></span> : <span>Join <span className="text-neonMint">Haritsattva</span></span>}
+        </h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <Label htmlFor="email">Email</Label>
@@ -240,24 +252,29 @@ export default function AuthPage() {
             </>
           )}
 
-          {error && <p className="text-red-500">{error}</p>}
-          <Button type="submit" className="w-full">
+          {error && <p className="text-red-400 text-sm bg-red-500/10 p-3 rounded-lg border border-red-500/20">{error}</p>}
+          <GlassButton type="submit" className="w-full text-lg py-6">
             {isLogin ? 'Login' : 'Sign Up'}
-          </Button>
+          </GlassButton>
         </form>
-        <p className="text-center text-sm">
-          {isLogin ? "Don't have an account? " : "Already have an account? "}
-          <button onClick={toggleForm} className="text-blue-500 hover:underline">
+        <p className="text-center text-base mt-6">
+          <span className="text-muted-foreground">
+            {isLogin ? "Don't have an account? " : "Already have an account? "}
+          </span>
+          <button onClick={toggleForm} className="text-neonMint hover:underline font-semibold">
             {isLogin ? 'Sign up' : 'Log in'}
           </button>
         </p>
-      </div>
+      </GlassCard>
 
       {/* Society Request Modal */}
       <Dialog open={requestModalOpen} onOpenChange={setRequestModalOpen}>
-        <DialogContent>
+        <DialogContent className="bg-background/95 backdrop-blur-xl border-2 border-primary/20 shadow-2xl">
           <DialogHeader>
-            <DialogTitle>Request Delivery to Your Society</DialogTitle>
+            <DialogTitle className="flex items-center gap-2 text-2xl font-heading tracking-tight">
+              <Building2 className="w-6 h-6 text-neonMint" />
+              Request Delivery to Your Society
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
@@ -294,9 +311,9 @@ export default function AuthPage() {
                 placeholder="Enter your phone number"
               />
             </div>
-            <Button onClick={handleSocietyRequest} className="w-full">
+            <GlassButton onClick={handleSocietyRequest} className="w-full text-lg py-6">
               Submit Request
-            </Button>
+            </GlassButton>
           </div>
         </DialogContent>
       </Dialog>

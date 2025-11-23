@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import GlassCard from "@/components/GlassCard";
+import GlassButton from "@/components/GlassButton";
 import {
   Select,
   SelectContent,
@@ -150,63 +152,66 @@ export default function CheckoutPage() {
 
   if (orderPlaced) {
     return (
-      <div className="max-w-4xl mx-auto px-6 py-16">
-        <Card>
-          <CardContent className="py-16 text-center">
-            <div className="mb-4 flex justify-center">
-              <img
-                src="/logo.png"
-                alt="Haritsattva"
-                className="w-16 h-16 object-contain"
-              />
-            </div>
-            <CheckCircle2 className="w-16 h-16 text-green-600 mx-auto mb-4" />
-            <h1 className="text-3xl font-bold mb-4">Order Placed Successfully!</h1>
-            <p className="text-muted-foreground mb-8">
-              Thank you for your order. We'll send you a confirmation email shortly.
-            </p>
-            <div className="flex gap-4 justify-center">
-              <Button onClick={() => navigate("/orders")}>View Orders</Button>
-              <Button variant="outline" onClick={() => navigate("/products")}>
-                Continue Shopping
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="max-w-4xl mx-auto px-6 py-20">
+        <GlassCard className="p-20 text-center shadow-premium-lg">
+          <div className="mb-8 flex justify-center">
+            <img
+              src="/logo.png"
+              alt="Haritsattva"
+              className="w-24 h-24 object-contain drop-shadow-2xl"
+            />
+          </div>
+          <CheckCircle2 className="w-24 h-24 text-neonMint mx-auto mb-8" />
+          <h1 className="text-5xl md:text-6xl font-heading font-bold mb-6 tracking-tight">Order Placed <span className="text-neonMint">Successfully!</span></h1>
+          <p className="text-muted-foreground mb-12 text-xl leading-relaxed">
+            Thank you for your order. We'll send you a confirmation email shortly.
+          </p>
+          <div className="flex gap-6 justify-center flex-wrap">
+            <GlassButton onClick={() => navigate("/orders")}>View Orders</GlassButton>
+            <Button
+              className="glass-dark hover:bg-white/10 px-8 py-6 text-lg"
+              variant="outline"
+              size="lg"
+              onClick={() => navigate("/products")}
+            >
+              Continue Shopping
+            </Button>
+          </div>
+        </GlassCard>
       </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-16">
+    <div className="max-w-6xl mx-auto px-6 py-20">
       <Button
         variant="ghost"
         onClick={() => navigate("/cart")}
-        className="mb-6"
+        className="mb-8 hover:bg-white/10"
       >
-        <ArrowLeft className="mr-2 h-4 w-4" />
+        <ArrowLeft className="mr-2 h-5 w-5" />
         Back to Cart
       </Button>
 
-      <div className="mb-6 flex justify-center">
+      <div className="mb-8 flex justify-center">
         <img
           src="/logo.png"
           alt="Haritsattva"
-          className="w-16 h-16 object-contain"
+          className="w-20 h-20 object-contain drop-shadow-lg"
         />
       </div>
 
-      <h1 className="text-3xl font-bold mb-8">Checkout</h1>
+      <h1 className="text-5xl md:text-6xl font-heading font-bold mb-12 text-center tracking-tight">
+        <span className="text-neonMint">Checkout</span>
+      </h1>
 
       <div className="grid md:grid-cols-3 gap-8">
         {/* Checkout Form */}
         <div className="md:col-span-2">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Shipping Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <GlassCard className="p-8">
+              <h2 className="text-2xl font-heading font-bold mb-6 tracking-tight">Shipping Information</h2>
+              <div className="space-y-6">
                 <div>
                   <Label htmlFor="name">Full Name *</Label>
                   <Input
@@ -296,14 +301,12 @@ export default function CheckoutPage() {
                     placeholder="Any special instructions for delivery..."
                   />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </GlassCard>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Payment Method</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
+            <GlassCard className="p-8">
+              <h2 className="text-2xl font-heading font-bold mb-6 tracking-tight">Payment Method</h2>
+              <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <input
                     type="radio"
@@ -330,43 +333,40 @@ export default function CheckoutPage() {
                   />
                   <Label htmlFor="upi">UPI</Label>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </GlassCard>
 
-            <Button
+            <GlassButton
               type="submit"
-              className="w-full"
-              size="lg"
+              className="w-full text-lg py-6"
               disabled={createOrderMutation.isPending}
             >
               {createOrderMutation.isPending ? "Placing Order..." : "Place Order"}
-            </Button>
+            </GlassButton>
           </form>
         </div>
 
         {/* Order Summary */}
         <div>
-          <Card className="sticky top-20">
-            <CardHeader>
-              <CardTitle>Order Summary</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          <GlassCard className="sticky top-20 p-8 shadow-premium-lg">
+            <h2 className="text-3xl font-heading font-bold mb-8 tracking-tight">Order Summary</h2>
+            <div className="space-y-6">
               {items.map((item) => (
-                <div key={item.id} className="flex justify-between text-sm">
-                  <span>
+                <div key={item.id} className="flex justify-between text-base">
+                  <span className="text-muted-foreground">
                     {item.name} x {item.quantity}
                   </span>
-                  <span>₹{(item.price * item.quantity).toFixed(2)}</span>
+                  <span className="font-bold">₹{(item.price * item.quantity).toFixed(2)}</span>
                 </div>
               ))}
-              <div className="border-t pt-4">
-                <div className="flex justify-between font-bold text-lg">
+              <div className="border-t border-white/20 pt-6">
+                <div className="flex justify-between font-bold text-2xl">
                   <span>Total</span>
-                  <span>₹{total.toFixed(2)}</span>
+                  <span className="text-neonMint">₹{total.toFixed(2)}</span>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </GlassCard>
         </div>
       </div>
 

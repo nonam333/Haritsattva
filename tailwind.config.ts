@@ -11,6 +11,10 @@ export default {
         sm: ".1875rem", /* 3px */
       },
       colors: {
+        // Premium Design Tokens
+        darkCharcoal: "#121212",
+        neonMint: "#00FF94",
+
         // Flat / base colors (regular buttons)
         background: "hsl(var(--background) / <alpha-value>)",
         foreground: "hsl(var(--foreground) / <alpha-value>)",
@@ -86,6 +90,10 @@ export default {
         sans: ["var(--font-sans)"],
         serif: ["var(--font-serif)"],
         mono: ["var(--font-mono)"],
+        heading: ['"Plus Jakarta Sans"', "var(--font-sans)"],
+      },
+      letterSpacing: {
+        tightest: "-0.02em",
       },
       keyframes: {
         "accordion-down": {
@@ -96,10 +104,29 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "glow-pulse": {
+          "0%, 100%": {
+            boxShadow: "0 0 20px rgba(0, 255, 148, 0.4), 0 0 40px rgba(0, 255, 148, 0.2)",
+          },
+          "50%": {
+            boxShadow: "0 0 30px rgba(0, 255, 148, 0.6), 0 0 60px rgba(0, 255, 148, 0.4)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "glow-pulse": "glow-pulse 2s ease-in-out infinite",
+      },
+      backdropBlur: {
+        xs: '2px',
+        sm: '4px',
+        DEFAULT: '8px',
+        md: '12px',
+        lg: '16px',
+        xl: '20px',
+        '2xl': '24px',
+        '3xl': '40px',
       },
     },
   },

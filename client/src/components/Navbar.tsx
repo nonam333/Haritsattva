@@ -35,26 +35,26 @@ export default function Navbar({}: NavbarProps) {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+    <nav className="sticky top-0 z-50 glass-strong border-b border-white/10 shadow-premium" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-16 sm:h-18">
           {/* Logo - Hidden on admin pages */}
           {!location.startsWith('/admin') && (
             <Link href="/" data-testid="link-home">
-              <div className="flex items-center gap-2 hover-elevate active-elevate-2 px-2 py-1 rounded-md cursor-pointer flex-shrink-0">
-                <img src="/logo.png" alt="Haritsattva" className="w-10 h-10 object-contain" />
-                <span className="text-lg font-semibold text-foreground">Haritsattva</span>
+              <div className="flex items-center gap-2 sm:gap-3 hover:scale-105 active:scale-95 px-2 py-1 rounded-lg cursor-pointer flex-shrink-0 transition-transform">
+                <img src="/logo.png" alt="Haritsattva" className="w-10 h-10 sm:w-12 sm:h-12 object-contain" />
+                <span className="text-lg sm:text-xl font-heading font-bold text-foreground tracking-tight">Haritsattva</span>
               </div>
             </Link>
           )}
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-2">
             {navLinks.map((link) => (
               <Link key={link.path} href={link.path} data-testid={`link-${link.label.toLowerCase().replace(' ', '-')}`}>
                 <Button
                   variant="ghost"
-                  className={location === link.path ? "bg-accent" : ""}
+                  className={`font-heading transition-all ${location === link.path ? "bg-neonMint/20 text-neonMint" : "hover:bg-white/10"}`}
                 >
                   {link.label}
                 </Button>
@@ -64,7 +64,7 @@ export default function Navbar({}: NavbarProps) {
               <Link href="/orders" data-testid="link-my-orders">
                 <Button
                   variant="ghost"
-                  className={location === "/orders" ? "bg-accent" : ""}
+                  className={`font-heading transition-all ${location === "/orders" ? "bg-neonMint/20 text-neonMint" : "hover:bg-white/10"}`}
                 >
                   My Orders
                 </Button>
