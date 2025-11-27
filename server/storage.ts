@@ -14,7 +14,9 @@ import {
   type ProductSuggestion,
   type InsertProductSuggestion,
   type SocietyRequest,
-  type InsertSocietyRequest
+  type InsertSocietyRequest,
+  type Payment,
+  type InsertPayment
 } from "@shared/schema";
 import { DrizzleStorage } from "./drizzleStorage";
 
@@ -69,6 +71,13 @@ export interface IStorage {
   getAllSocietyRequests(): Promise<SocietyRequest[]>;
   createSocietyRequest(request: InsertSocietyRequest): Promise<SocietyRequest>;
   deleteSocietyRequest(id: string): Promise<boolean>;
+
+  // Payments
+  createPayment(payment: InsertPayment): Promise<Payment>;
+  updatePayment(id: string, payment: Partial<InsertPayment>): Promise<Payment | undefined>;
+  getPaymentByOrderId(orderId: string): Promise<Payment | undefined>;
+  getPaymentByRazorpayOrderId(razorpayOrderId: string): Promise<Payment | undefined>;
+  updateOrderPaymentStatus(orderId: string, paymentStatus: string): Promise<Order | undefined>;
 }
 
 export const storage = new DrizzleStorage();
@@ -89,5 +98,7 @@ export {
   type ProductSuggestion,
   type InsertProductSuggestion,
   type SocietyRequest,
-  type InsertSocietyRequest
+  type InsertSocietyRequest,
+  type Payment,
+  type InsertPayment
 };

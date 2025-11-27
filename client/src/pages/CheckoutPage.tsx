@@ -27,6 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, CheckCircle2, Building2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
+import { useRazorpay } from "@/hooks/useRazorpay";
 
 export default function CheckoutPage() {
   const [, navigate] = useLocation();
@@ -40,6 +41,7 @@ export default function CheckoutPage() {
     societyName: "",
     phone: "",
   });
+  const { initiatePayment, isProcessing } = useRazorpay();
 
   const [formData, setFormData] = useState({
     shippingName: "",
@@ -64,6 +66,17 @@ export default function CheckoutPage() {
     }
   }, [user]); // Run when user object changes
 
+  // Check for successful payment via URL parameter
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('success') === 'true') {
+      setOrderPlaced(true);
+      clearCart();
+      // Clean up URL
+      window.history.replaceState({}, '', '/checkout');
+    }
+  }, [clearCart]);
+
   const createOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
       console.log('[Checkout] Placing order:', orderData);
@@ -80,10 +93,37 @@ export default function CheckoutPage() {
       console.log('[Checkout] Order created:', result);
       return result;
     },
-    onSuccess: () => {
-      setOrderPlaced(true);
-      clearCart();
-      toast({ title: "Order placed successfully!" });
+    onSuccess: async (data) => {
+      const orderId = data.order.id;
+
+      // Check payment method
+      if (formData.paymentMethod === "upi") {
+        // UPI Payment: Initiate Razorpay payment
+        // Success will be handled by redirect to /checkout?success=true after payment verification
+        try {
+          await initiatePayment(orderId, total, {
+            name: formData.shippingName,
+            email: formData.shippingEmail,
+            phone: formData.shippingPhone,
+          });
+          // Don't set orderPlaced here - wait for payment verification
+        } catch (error: any) {
+          console.error("Payment initiation error:", error);
+          toast({
+            title: "Payment Failed",
+            description: error.message || "Failed to initiate payment. Please try again.",
+            variant: "destructive"
+          });
+        }
+      } else {
+        // COD Payment: Mark order as placed immediately
+        setOrderPlaced(true);
+        clearCart();
+        toast({
+          title: "Order Placed!",
+          description: "Your order has been placed successfully. Pay on delivery.",
+        });
+      }
     },
     onError: (error: any) => {
       console.error("[Checkout] Order placement error:", error);
@@ -124,7 +164,7 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const orderData = {
@@ -339,9 +379,9 @@ export default function CheckoutPage() {
             <GlassButton
               type="submit"
               className="w-full text-lg py-6"
-              disabled={createOrderMutation.isPending}
+              disabled={createOrderMutation.isPending || isProcessing}
             >
-              {createOrderMutation.isPending ? "Placing Order..." : "Place Order"}
+              {createOrderMutation.isPending ? "Placing Order..." : isProcessing ? "Processing Payment..." : "Place Order"}
             </GlassButton>
           </form>
         </div>

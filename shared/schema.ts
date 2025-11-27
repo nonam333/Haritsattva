@@ -85,6 +85,7 @@ export const orders = pgTable("orders", {
   userId: varchar("user_id").notNull().references(() => users.id),
   total: decimal("total", { precision: 10, scale: 2 }).notNull(),
   status: varchar("status", { length: 50 }).notNull().default("pending"), // pending, confirmed, shipped, delivered, cancelled
+  paymentStatus: varchar("payment_status", { length: 50 }).notNull().default("pending_payment"), // pending_payment, paid, failed, refunded
   shippingName: text("shipping_name").notNull(),
   shippingEmail: text("shipping_email").notNull(),
   shippingPhone: text("shipping_phone").notNull(),
@@ -104,6 +105,22 @@ export const orderItems = pgTable("order_items", {
   productName: text("product_name").notNull(), // Store name for historical record
   quantity: integer("quantity").notNull(),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(), // Price at time of order
+});
+
+// Payments table
+export const payments = pgTable("payments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  orderId: varchar("order_id").notNull().references(() => orders.id),
+  razorpayOrderId: varchar("razorpay_order_id", { length: 100 }).unique(),
+  razorpayPaymentId: varchar("razorpay_payment_id", { length: 100 }).unique(),
+  razorpaySignature: varchar("razorpay_signature", { length: 255 }),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency", { length: 10 }).notNull().default("INR"),
+  status: varchar("status", { length: 50 }).notNull().default("created"), // created, authorized, captured, failed, refunded
+  paymentMethod: varchar("payment_method", { length: 50 }), // upi, card, netbanking, wallet
+  paymentDetails: jsonb("payment_details"), // card last4, UPI VPA, etc.
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const insertProductSchema = createInsertSchema(products).omit({
@@ -156,6 +173,12 @@ export const insertSocietyRequestSchema = createInsertSchema(societyRequests).om
   createdAt: true,
 });
 
+export const insertPaymentSchema = createInsertSchema(payments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type Product = typeof products.$inferSelect;
@@ -174,3 +197,5 @@ export type ProductSuggestion = typeof productSuggestions.$inferSelect;
 export type InsertProductSuggestion = z.infer<typeof insertProductSuggestionSchema>;
 export type SocietyRequest = typeof societyRequests.$inferSelect;
 export type InsertSocietyRequest = z.infer<typeof insertSocietyRequestSchema>;
+export type Payment = typeof payments.$inferSelect;
+export type InsertPayment = z.infer<typeof insertPaymentSchema>;

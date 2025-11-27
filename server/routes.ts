@@ -9,6 +9,7 @@ import {
   insertOrderItemSchema,
   insertProductSuggestionSchema,
   insertSocietyRequestSchema,
+  insertPaymentSchema,
   users
 } from "@shared/schema";
 import { isAdmin } from "./adminAuth";
@@ -16,6 +17,12 @@ import { v2 as cloudinary } from "cloudinary";
 import { lucia } from "./auth";
 import { generateId } from "lucia";
 import { Argon2id } from "oslo/password";
+import {
+  createRazorpayOrder,
+  verifyPaymentSignature,
+  verifyWebhookSignature,
+  fetchPaymentDetails
+} from "./razorpayService";
 
 // Configure Cloudinary
 cloudinary.config({
@@ -236,6 +243,187 @@ export function registerApiRoutes(app: Express) {
     } catch (error) {
       console.error("Error fetching categories:", error);
       res.status(500).json({ error: "Failed to fetch categories" });
+    }
+  });
+
+  // ============== PAYMENT ROUTES ==============
+
+  // Create Razorpay order before payment
+  app.post("/api/payments/create-order", async (req: any, res) => {
+    if (!res.locals.user) return res.status(401).json({ error: "Unauthorized" });
+    try {
+      const { amount, orderId } = req.body;
+
+      if (!amount || !orderId) {
+        return res.status(400).json({ error: "Amount and orderId are required" });
+      }
+
+      // Get order to verify it belongs to user
+      const order = await storage.getOrder(orderId);
+      if (!order || order.userId !== res.locals.user.id) {
+        return res.status(403).json({ error: "Order not found or unauthorized" });
+      }
+
+      // Convert amount to paise (smallest currency unit)
+      const amountInPaise = Math.round(parseFloat(amount) * 100);
+
+      // Create Razorpay order
+      // Note: Receipt must be max 40 characters, so we truncate the orderId
+      const receipt = orderId.substring(0, 40);
+      const razorpayOrder = await createRazorpayOrder(
+        amountInPaise,
+        "INR",
+        receipt,
+        { orderId }
+      );
+
+      // Store payment record
+      await storage.createPayment({
+        orderId,
+        razorpayOrderId: razorpayOrder.id,
+        amount: amount.toString(),
+        currency: "INR",
+        status: "created",
+      });
+
+      res.json({
+        razorpayOrderId: razorpayOrder.id,
+        key_id: process.env.RAZORPAY_KEY_ID,
+        amount: razorpayOrder.amount,
+        currency: razorpayOrder.currency,
+      });
+    } catch (error: any) {
+      console.error("Create Razorpay order error:", error);
+      console.error("Error details:", {
+        message: error.message,
+        stack: error.stack,
+        response: error.response?.data
+      });
+      res.status(500).json({
+        error: "Failed to create payment order",
+        details: error.message
+      });
+    }
+  });
+
+  // Verify payment after customer completes payment
+  app.post("/api/payments/verify", async (req: any, res) => {
+    if (!res.locals.user) return res.status(401).json({ error: "Unauthorized" });
+    try {
+      const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body;
+
+      if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !orderId) {
+        return res.status(400).json({ error: "Missing payment verification data" });
+      }
+
+      // Verify signature
+      const isValid = verifyPaymentSignature(
+        razorpay_order_id,
+        razorpay_payment_id,
+        razorpay_signature
+      );
+
+      if (!isValid) {
+        return res.status(400).json({ error: "Invalid payment signature" });
+      }
+
+      // Get order to verify it belongs to user
+      const order = await storage.getOrder(orderId);
+      if (!order || order.userId !== res.locals.user.id) {
+        return res.status(403).json({ error: "Order not found or unauthorized" });
+      }
+
+      // Fetch payment details from Razorpay
+      const paymentDetails = await fetchPaymentDetails(razorpay_payment_id);
+
+      // Update payment record
+      const payment = await storage.getPaymentByRazorpayOrderId(razorpay_order_id);
+      if (payment) {
+        await storage.updatePayment(payment.id, {
+          razorpayPaymentId: razorpay_payment_id,
+          razorpaySignature: razorpay_signature,
+          status: "captured",
+          paymentMethod: paymentDetails.method || "upi",
+          paymentDetails: paymentDetails,
+        });
+      }
+
+      // Update order payment status and order status
+      await storage.updateOrderPaymentStatus(orderId, "paid");
+      await storage.updateOrderStatus(orderId, "confirmed");
+
+      res.json({ success: true, message: "Payment verified successfully" });
+    } catch (error) {
+      console.error("Payment verification error:", error);
+      res.status(500).json({ error: "Payment verification failed" });
+    }
+  });
+
+  // Webhook handler for Razorpay events
+  app.post("/api/webhooks/razorpay", async (req: any, res) => {
+    try {
+      const webhookSignature = req.headers["x-razorpay-signature"];
+      const webhookBody = req.rawBody; // Raw body is captured by middleware
+
+      if (!webhookSignature || !webhookBody) {
+        return res.status(400).json({ error: "Missing webhook signature or body" });
+      }
+
+      // Verify webhook signature
+      const isValid = verifyWebhookSignature(webhookBody, webhookSignature);
+
+      if (!isValid) {
+        console.error("Invalid webhook signature");
+        return res.status(400).json({ error: "Invalid webhook signature" });
+      }
+
+      const event = req.body;
+      console.log("Razorpay webhook event:", event.event);
+
+      // Handle different webhook events
+      switch (event.event) {
+        case "payment.authorized":
+        case "payment.captured":
+          const paymentEntity = event.payload.payment.entity;
+          const payment = await storage.getPaymentByRazorpayOrderId(paymentEntity.order_id);
+
+          if (payment) {
+            await storage.updatePayment(payment.id, {
+              razorpayPaymentId: paymentEntity.id,
+              status: "captured",
+              paymentMethod: paymentEntity.method,
+              paymentDetails: paymentEntity,
+            });
+
+            // Update order status
+            await storage.updateOrderPaymentStatus(payment.orderId, "paid");
+            await storage.updateOrderStatus(payment.orderId, "confirmed");
+          }
+          break;
+
+        case "payment.failed":
+          const failedPayment = event.payload.payment.entity;
+          const failedPaymentRecord = await storage.getPaymentByRazorpayOrderId(failedPayment.order_id);
+
+          if (failedPaymentRecord) {
+            await storage.updatePayment(failedPaymentRecord.id, {
+              razorpayPaymentId: failedPayment.id,
+              status: "failed",
+              paymentDetails: failedPayment,
+            });
+
+            await storage.updateOrderPaymentStatus(failedPaymentRecord.orderId, "failed");
+          }
+          break;
+
+        default:
+          console.log("Unhandled webhook event:", event.event);
+      }
+
+      res.json({ status: "ok" });
+    } catch (error) {
+      console.error("Webhook processing error:", error);
+      res.status(500).json({ error: "Webhook processing failed" });
     }
   });
 

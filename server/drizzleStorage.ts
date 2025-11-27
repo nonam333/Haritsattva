@@ -20,6 +20,8 @@ import {
   InsertProductSuggestion,
   SocietyRequest,
   InsertSocietyRequest,
+  Payment,
+  InsertPayment,
 } from "./storage"; // Assuming IStorage and types are exported from storage.ts
 import { randomUUID } from "crypto";
 
@@ -233,6 +235,40 @@ export class DrizzleStorage implements IStorage {
   async deleteSocietyRequest(id: string): Promise<boolean> {
     const result = await this.db.delete(schema.societyRequests).where(eq(schema.societyRequests.id, id)).returning({ id: schema.societyRequests.id });
     return result.length > 0;
+  }
+
+  // Payments
+  async createPayment(insertPayment: InsertPayment): Promise<Payment> {
+    const [payment] = await this.db.insert(schema.payments).values(insertPayment).returning();
+    return payment;
+  }
+
+  async updatePayment(id: string, updates: Partial<InsertPayment>): Promise<Payment | undefined> {
+    const [payment] = await this.db
+      .update(schema.payments)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(schema.payments.id, id))
+      .returning();
+    return payment;
+  }
+
+  async getPaymentByOrderId(orderId: string): Promise<Payment | undefined> {
+    const payments = await this.db.select().from(schema.payments).where(eq(schema.payments.orderId, orderId)).limit(1);
+    return payments[0];
+  }
+
+  async getPaymentByRazorpayOrderId(razorpayOrderId: string): Promise<Payment | undefined> {
+    const payments = await this.db.select().from(schema.payments).where(eq(schema.payments.razorpayOrderId, razorpayOrderId)).limit(1);
+    return payments[0];
+  }
+
+  async updateOrderPaymentStatus(orderId: string, paymentStatus: string): Promise<Order | undefined> {
+    const [order] = await this.db
+      .update(schema.orders)
+      .set({ paymentStatus, updatedAt: new Date() })
+      .where(eq(schema.orders.id, orderId))
+      .returning();
+    return order;
   }
 }
 
