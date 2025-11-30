@@ -1,10 +1,12 @@
+
 {
   "permissions": {
     "allow": [
       "Bash(git add:*)",
       "Bash(git commit -m \"$(cat <<''EOF''\nfix: Add Netlify deployment configuration and security fixes\n\n- Add netlify.toml with correct build configuration\n- Add .netlifyignore to prevent exposing local .env secrets\n- Create Netlify serverless function wrapper (netlify/functions/api.ts)\n- Split Express app into separate module (server/app.ts)\n- Update .gitignore to exclude .netlify build cache\n- Add deployment guides (DEPLOYMENT_GUIDE.md, SECURITY_FIX.md)\n- Add .env.example with placeholder values\n\nFixes:\n- Netlify build errors from cached tRPC dependencies\n- Exposed secrets error (local .env was being scanned)\n- Wrong publish directory (dist -> dist/public)\n- Stale cache issues\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
       "Bash(git push:*)",
-      "Bash(npm install)"
+      "Bash(npm install)",
+      "Bash(npm install:*)"
     ],
     "deny": [],
     "ask": []

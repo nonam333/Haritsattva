@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Lightbulb, Loader2 } from "lucide-react";
 import type { Product, Category } from "@shared/schema";
 
@@ -20,13 +21,24 @@ export default function ProductsPage() {
   });
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { language } = useLanguage();
 
   const { data: products, isLoading: productsLoading} = useQuery<Product[]>({
-    queryKey: ["/api/products"],
+    queryKey: ["/api/products", language],
+    queryFn: async () => {
+      const response = await fetch(`/api/products?lang=${language}`);
+      if (!response.ok) throw new Error("Failed to fetch products");
+      return response.json();
+    },
   });
 
   const { data: categories, isLoading: categoriesLoading } = useQuery<Category[]>({
-    queryKey: ["/api/categories"],
+    queryKey: ["/api/categories", language],
+    queryFn: async () => {
+      const response = await fetch(`/api/categories?lang=${language}`);
+      if (!response.ok) throw new Error("Failed to fetch categories");
+      return response.json();
+    },
   });
 
   const suggestionMutation = useMutation({

@@ -1,10 +1,12 @@
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Minus, ShoppingCart } from "lucide-react";
 import { useLocation } from "wouter";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useState } from "react";
 
 interface ProductCardProps {
   id: string;
@@ -13,20 +15,36 @@ interface ProductCardProps {
   imageUrl: string;
 }
 
+// Weight options in kg
+const WEIGHT_OPTIONS = [
+  { value: 0.1, label: "100 gm", display: "100g" },
+  { value: 0.25, label: "250 gm", display: "250g" },
+  { value: 0.5, label: "500 gm", display: "500g" },
+  { value: 1, label: "1 kg", display: "1kg" },
+  { value: 2, label: "2 kg", display: "2kg" },
+];
+
 export default function ProductCard({
   id,
   name,
   price,
   imageUrl,
 }: ProductCardProps) {
-  const { addToCart, updateQuantity, removeFromCart, items } = useCart();
+  const { addToCart, updateQuantity, removeFromCart, items, getCartItemId } = useCart();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const { isAuthenticated } = useAuth();
+  const [selectedWeight, setSelectedWeight] = useState<number>(0.5); // Default to 500gm
 
-  // Check if product is already in cart
-  const cartItem = items.find(item => item.id === id);
+  // Check if product with this weight is already in cart
+  const cartItemId = getCartItemId(id, selectedWeight);
+  const cartItem = items.find(item => item.id === cartItemId);
   const quantityInCart = cartItem?.quantity || 0;
+
+  const calculatePrice = () => {
+    const numPrice = typeof price === 'number' ? price : parseFloat(price);
+    return (numPrice * selectedWeight).toFixed(2);
+  };
 
   const handleAddToCart = () => {
     // Redirect to login if not authenticated
@@ -41,10 +59,11 @@ export default function ProductCard({
     }
 
     const numPrice = typeof price === 'number' ? price : parseFloat(price);
-    addToCart({ id, name, price: numPrice, imageUrl });
+    const weightLabel = WEIGHT_OPTIONS.find(w => w.value === selectedWeight)?.display || '';
+    addToCart({ id, name, price: numPrice, imageUrl, weight: selectedWeight });
     toast({
       title: "Added to cart",
-      description: `${name} has been added to your cart.`,
+      description: `${name} (${weightLabel}) has been added to your cart.`,
       action: (
         <Button
           size="sm"
@@ -73,9 +92,9 @@ export default function ProductCard({
 
     const numPrice = typeof price === 'number' ? price : parseFloat(price);
     if (quantityInCart > 0) {
-      updateQuantity(id, quantityInCart + 1);
+      updateQuantity(cartItemId, quantityInCart + 1);
     } else {
-      addToCart({ id, name, price: numPrice, imageUrl });
+      addToCart({ id, name, price: numPrice, imageUrl, weight: selectedWeight });
     }
   };
 
@@ -92,9 +111,9 @@ export default function ProductCard({
     }
 
     if (quantityInCart > 1) {
-      updateQuantity(id, quantityInCart - 1);
+      updateQuantity(cartItemId, quantityInCart - 1);
     } else if (quantityInCart === 1) {
-      removeFromCart(id);
+      removeFromCart(cartItemId);
     }
   };
 
@@ -120,9 +139,31 @@ export default function ProductCard({
         >
           {name}
         </h3>
-        <p className="text-xl sm:text-2xl font-bold text-primary mt-auto group-hover:text-neonMint transition-colors" data-testid={`text-product-price-${id}`}>
-          ₹{typeof price === 'number' ? price.toFixed(2) : parseFloat(price).toFixed(2)}
-        </p>
+        <div className="mt-auto space-y-2">
+          <p className="text-sm text-muted-foreground">
+            ₹{typeof price === 'number' ? price.toFixed(2) : parseFloat(price).toFixed(2)}/kg
+          </p>
+          <div className="flex items-center gap-2">
+            <Select
+              value={selectedWeight.toString()}
+              onValueChange={(value) => setSelectedWeight(parseFloat(value))}
+            >
+              <SelectTrigger className="w-[120px] h-9 text-sm">
+                <SelectValue placeholder="Weight" />
+              </SelectTrigger>
+              <SelectContent>
+                {WEIGHT_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value.toString()}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xl sm:text-2xl font-bold text-primary group-hover:text-neonMint transition-colors" data-testid={`text-product-price-${id}`}>
+              ₹{calculatePrice()}
+            </p>
+          </div>
+        </div>
       </CardContent>
       <CardFooter className="p-4 sm:p-5 md:p-6 pt-0">
         {quantityInCart === 0 ? (

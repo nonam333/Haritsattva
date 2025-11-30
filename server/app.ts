@@ -1,8 +1,17 @@
 import express, { type Request, Response, NextFunction } from "express";
 import cors from "cors";
+import path from "path";
 import { log } from "./vite";
 
 const app = express();
+
+// Serve images folder as static files
+const imagesPath = path.resolve(process.cwd(), "images");
+app.use("/images", express.static(imagesPath));
+
+// Serve uploaded images folder as static files
+const uploadedImagesPath = path.resolve(process.cwd(), "attached_assets", "uploaded_images");
+app.use("/uploaded_images", express.static(uploadedImagesPath));
 
 // CORS Configuration for Android/Mobile App
 app.use(cors({

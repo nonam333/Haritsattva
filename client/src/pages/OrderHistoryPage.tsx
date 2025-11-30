@@ -80,14 +80,18 @@ export default function OrderHistoryPage() {
               <div>
                 <h4 className="font-heading font-bold text-lg mb-4 tracking-tight">Items</h4>
                 <div className="space-y-3">
-                  {order.items?.map((item: any) => (
-                    <div key={item.id} className="flex justify-between text-base">
-                      <span className="text-muted-foreground">
-                        {item.productName} × {item.quantity}
-                      </span>
-                      <span className="font-bold">₹{(parseFloat(item.price) * item.quantity).toFixed(2)}</span>
-                    </div>
-                  ))}
+                  {order.items?.map((item: any) => {
+                    const weight = parseFloat(item.weight || 1);
+                    const weightLabel = weight === 1 ? '1kg' : weight < 1 ? `${weight * 1000}g` : `${weight}kg`;
+                    return (
+                      <div key={item.id} className="flex justify-between text-base">
+                        <span className="text-muted-foreground">
+                          {item.productName} ({weightLabel}) × {item.quantity}
+                        </span>
+                        <span className="font-bold">₹{(parseFloat(item.price) * weight * item.quantity).toFixed(2)}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -99,9 +103,8 @@ export default function OrderHistoryPage() {
                 <p className="text-base text-muted-foreground leading-relaxed">
                   {order.shippingName}
                   <br />
+                  {order.shippingFlatNumber && `${order.shippingFlatNumber}, `}
                   {order.shippingAddress}
-                  <br />
-                  {order.shippingCity}, {order.shippingState} {order.shippingZip}
                   <br />
                   {order.shippingPhone}
                 </p>

@@ -169,15 +169,26 @@ export default function CheckoutPage() {
 
     const orderData = {
       ...formData,
+      // Ensure no null values are sent - convert null to empty string
+      shippingFlatNumber: formData.shippingFlatNumber || "",
+      notes: formData.notes || "",
       total: total.toString(),
-      items: items.map((item) => ({
-        productId: item.id,
-        productName: item.name,
-        quantity: item.quantity,
-        price: item.price.toString(),
-      })),
+      items: items.map((item) => {
+        // Cart item ID format: {uuid}-{weight}
+        // Extract product ID by removing the last segment (weight)
+        const parts = item.id.split('-');
+        const productId = parts.slice(0, -1).join('-'); // Remove last part (weight)
+        return {
+          productId,
+          productName: item.name,
+          quantity: item.quantity,
+          weight: item.weight.toString(),
+          price: item.price.toString(),
+        };
+      }),
     };
 
+    console.log("[Checkout] Submitting order data:", orderData);
     createOrderMutation.mutate(orderData);
   };
 

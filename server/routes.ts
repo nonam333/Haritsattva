@@ -214,8 +214,17 @@ export function registerApiRoutes(app: Express) {
   // ============== PUBLIC PRODUCT ROUTES ==============
   app.get("/api/products", async (req, res) => {
     try {
+      const lang = (req.query.lang as string) || 'en';
       const products = await storage.getAllProducts();
-      res.json(products);
+
+      // Transform products to include translated fields
+      const translatedProducts = products.map(product => ({
+        ...product,
+        name: product.nameTranslations?.[lang as 'en' | 'hi'] || product.name,
+        description: product.descriptionTranslations?.[lang as 'en' | 'hi'] || product.description,
+      }));
+
+      res.json(translatedProducts);
     } catch (error) {
       console.error("Error fetching products:", error);
       res.status(500).json({ error: "Failed to fetch products" });
@@ -224,11 +233,20 @@ export function registerApiRoutes(app: Express) {
 
   app.get("/api/products/:id", async (req, res) => {
     try {
+      const lang = (req.query.lang as string) || 'en';
       const product = await storage.getProduct(req.params.id);
       if (!product) {
         return res.status(404).json({ error: "Product not found" });
       }
-      res.json(product);
+
+      // Transform product to include translated fields
+      const translatedProduct = {
+        ...product,
+        name: product.nameTranslations?.[lang as 'en' | 'hi'] || product.name,
+        description: product.descriptionTranslations?.[lang as 'en' | 'hi'] || product.description,
+      };
+
+      res.json(translatedProduct);
     } catch (error) {
       console.error("Error fetching product:", error);
       res.status(500).json({ error: "Failed to fetch product" });
@@ -238,8 +256,16 @@ export function registerApiRoutes(app: Express) {
   // ============== PUBLIC CATEGORY ROUTES ==============
   app.get("/api/categories", async (req, res) => {
     try {
+      const lang = (req.query.lang as string) || 'en';
       const categories = await storage.getAllCategories();
-      res.json(categories);
+
+      // Transform categories to include translated fields
+      const translatedCategories = categories.map(cat => ({
+        ...cat,
+        name: cat.nameTranslations?.[lang as 'en' | 'hi'] || cat.name,
+      }));
+
+      res.json(translatedCategories);
     } catch (error) {
       console.error("Error fetching categories:", error);
       res.status(500).json({ error: "Failed to fetch categories" });
@@ -432,10 +458,19 @@ export function registerApiRoutes(app: Express) {
     if (!res.locals.user) return res.status(401).json({ error: "Unauthorized" });
     try {
       const userId = res.locals.user.id;
-      const validatedOrder = insertOrderSchema.parse({
+
+      console.log("[Order] Request body:", JSON.stringify(req.body, null, 2));
+
+      // Ensure shippingFlatNumber is never null (convert null to empty string)
+      const orderData = {
         ...req.body,
         userId,
-      });
+        shippingFlatNumber: req.body.shippingFlatNumber || "",
+      };
+
+      const validatedOrder = insertOrderSchema.parse(orderData);
+
+      console.log("[Order] Validated order:", JSON.stringify(validatedOrder, null, 2));
 
       const order = await storage.createOrder(validatedOrder);
 
@@ -444,9 +479,7 @@ export function registerApiRoutes(app: Express) {
         shippingName: req.body.shippingName,
         shippingPhone: req.body.shippingPhone,
         shippingAddress: req.body.shippingAddress,
-        shippingCity: req.body.shippingCity,
-        shippingState: req.body.shippingState,
-        shippingZip: req.body.shippingZip,
+        shippingFlatNumber: req.body.shippingFlatNumber || "",
       });
 
       // Create order items
@@ -457,14 +490,25 @@ export function registerApiRoutes(app: Express) {
             productId: item.productId,
             productName: item.productName,
             quantity: item.quantity,
+            weight: item.weight || "1", // Default to 1kg if not provided
             price: item.price,
           });
         }
       }
 
       res.json({ success: true, order });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Create order error:", error);
+
+      // If it's a Zod validation error, return detailed info
+      if (error.name === 'ZodError') {
+        console.error("Validation errors:", JSON.stringify(error.errors, null, 2));
+        return res.status(400).json({
+          error: "Invalid order data",
+          details: error.errors
+        });
+      }
+
       res.status(400).json({ error: "Invalid order data" });
     }
   });

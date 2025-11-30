@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import ThemeToggle from "@/components/ThemeToggle";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -74,6 +75,9 @@ export default function Navbar({}: NavbarProps) {
 
           {/* Cart Icon, User & Theme Toggle */}
           <div className="flex items-center gap-1 flex-shrink-0">
+            <div className="hidden lg:block">
+              <LanguageSwitcher />
+            </div>
             <div className="hidden lg:block">
               <ThemeToggle />
             </div>
@@ -199,6 +203,11 @@ export default function Navbar({}: NavbarProps) {
                   </Button>
                 </>
               )}
+              {/* Language Toggle in Mobile Menu */}
+              <div className="flex items-center justify-between px-3 py-2">
+                <span className="text-sm font-medium">Language</span>
+                <LanguageSwitcher />
+              </div>
               {/* Dark Mode Toggle in Mobile Menu */}
               <div className="flex items-center justify-between px-3 py-2">
                 <span className="text-sm font-medium">Dark Mode</span>

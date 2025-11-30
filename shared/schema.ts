@@ -34,6 +34,7 @@ export const session = pgTable("session", {
 export const categories = pgTable("categories", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull().unique(),
+  nameTranslations: jsonb("name_translations").$type<{ en: string; hi: string }>(),
   description: text("description"),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -41,7 +42,9 @@ export const categories = pgTable("categories", {
 export const products = pgTable("products", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
+  nameTranslations: jsonb("name_translations").$type<{ en: string; hi: string }>(),
   description: text("description").notNull(),
+  descriptionTranslations: jsonb("description_translations").$type<{ en: string; hi: string }>(),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   categoryId: varchar("category_id").references(() => categories.id),
   category: text("category").notNull(), // Keep for backward compatibility
@@ -55,6 +58,7 @@ export const cartItems = pgTable("cart_items", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   productId: varchar("product_id").notNull(),
   quantity: integer("quantity").notNull().default(1),
+  weight: decimal("weight", { precision: 10, scale: 3 }).notNull().default("1"), // Weight in kg (0.1, 0.25, 0.5, 1, 2)
 });
 
 export const contactSubmissions = pgTable("contact_submissions", {
@@ -104,7 +108,8 @@ export const orderItems = pgTable("order_items", {
   productId: varchar("product_id").notNull().references(() => products.id),
   productName: text("product_name").notNull(), // Store name for historical record
   quantity: integer("quantity").notNull(),
-  price: decimal("price", { precision: 10, scale: 2 }).notNull(), // Price at time of order
+  weight: decimal("weight", { precision: 10, scale: 3 }).notNull().default("1"), // Weight in kg
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(), // Price at time of order (per kg)
 });
 
 // Payments table

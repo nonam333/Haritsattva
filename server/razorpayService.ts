@@ -1,11 +1,18 @@
 import Razorpay from "razorpay";
 import crypto from "crypto";
 
-// Initialize Razorpay instance
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || "",
-  key_secret: process.env.RAZORPAY_KEY_SECRET || "",
-});
+// Initialize Razorpay instance only if credentials are provided
+let razorpay: Razorpay | null = null;
+
+if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+  razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
+  });
+  console.log('[Razorpay] Service initialized successfully');
+} else {
+  console.warn('[Razorpay] Service not initialized - missing credentials. Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET environment variables.');
+}
 
 export interface RazorpayOrderOptions {
   amount: number; // Amount in smallest currency unit (paise for INR)
@@ -42,6 +49,10 @@ export async function createRazorpayOrder(
   receipt: string,
   notes?: Record<string, string>
 ): Promise<RazorpayOrder> {
+  if (!razorpay) {
+    throw new Error("Razorpay service not initialized. Please configure RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.");
+  }
+
   try {
     const options: RazorpayOrderOptions = {
       amount,
@@ -126,6 +137,10 @@ export function verifyWebhookSignature(
  * @returns Payment details
  */
 export async function fetchPaymentDetails(paymentId: string) {
+  if (!razorpay) {
+    throw new Error("Razorpay service not initialized. Please configure RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.");
+  }
+
   try {
     const payment = await razorpay.payments.fetch(paymentId);
     return payment;

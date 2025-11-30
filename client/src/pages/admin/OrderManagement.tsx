@@ -127,11 +127,15 @@ export default function OrderManagement() {
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
-                      {order.items?.slice(0, 2).map((item: any) => (
-                        <div key={item.id}>
-                          {item.productName} x{item.quantity}
-                        </div>
-                      ))}
+                      {order.items?.slice(0, 2).map((item: any) => {
+                        const weight = parseFloat(item.weight || 1);
+                        const weightLabel = weight === 1 ? '1kg' : weight < 1 ? `${weight * 1000}g` : `${weight}kg`;
+                        return (
+                          <div key={item.id}>
+                            {item.productName} ({weightLabel}) x{item.quantity}
+                          </div>
+                        );
+                      })}
                       {order.items?.length > 2 && (
                         <div className="text-muted-foreground">
                           +{order.items.length - 2} more
